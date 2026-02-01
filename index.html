@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine?</title>
+    <style>
+        :root {
+            --primary-pink: #ff4d6d;
+            --soft-pink: #fff0f3;
+            --deep-red: #c9184a;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--soft-pink);
+            font-family: 'Dancing Script', cursive, sans-serif;
+        }
+
+        /* --- Falling Hearts Background --- */
+        .heart {
+            position: absolute;
+            color: var(--primary-pink);
+            opacity: 0.6;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        /* --- Minimalist Overlay --- */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: all 1s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        .gif-container {
+            width: 250px;
+            margin-bottom: 20px;
+        }
+
+        .gif-container img {
+            width: 100%;
+            border-radius: 20px;
+        }
+
+        .slide-up-btn {
+            background: var(--primary-pink);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 77, 109, 0.2);
+            transition: 0.3s;
+        }
+
+        /* --- Main UI --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--deep-red);
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #yesBtn {
+            background-color: #2ecc71; /* A nice "Go" green */
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #noBtn {
+            background-color: var(--primary-pink);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            transition: 0.3s ease;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="overlay">
+        <div class="gif-container">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXp1ZzR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZNo/l41lTfux6NoS1bWlG/giphy.gif" alt="Cute Bear">
+        </div>
+        <h2 style="color: var(--deep-red); font-size: 2rem;">Hey you...</h2>
+        <button class="slide-up-btn" onclick="startLove()">Click to see ❤️</button>
+    </div>
+
+    <div class="main-content">
+        <h1>Will you be my Valentine?</h1>
+        <div class="btn-container">
+            <button id="yesBtn" onclick="celebrate()">YES!</button>
+            <button id="noBtn" onmouseover="moveNo()">No</button>
+        </div>
+    </div>
+
+    <script>
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 2 + 's';
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+        setInterval(createHeart, 300);
+
+        function startLove() {
+            document.getElementById('overlay').style.transform = 'translateY(-100%)';
+        }
+
+        let yesScale = 1;
+        function moveNo() {
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+            
+            // Randomly move No button
+            const x = Math.random() * (window.innerWidth - 150);
+            const y = Math.random() * (window.innerHeight - 150);
+            
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+
+            // Make YES grow
+            yesScale += 0.3;
+            yesBtn.style.transform = `scale(${yesScale})`;
+        }
+
+        function celebrate() {
+            document.querySelector('.main-content').innerHTML = `
+                <h1 style="font-size: 4rem; color: #ff4d6d;">YAY! SEE YOU SOON! ❤️</h1>
+                <div style="width:300px; margin: 0 auto;">
+                    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXp1ZzR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6NHR6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZNo/l41lTfux6NoS1bWlG/giphy.gif" style="width:100%; border-radius: 20px;">
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
