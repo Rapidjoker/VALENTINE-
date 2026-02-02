@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round 2?</title>
+    <style>
+        :root {
+            --gaming-red: #ff4655; /* Valorant style red */
+            --dark-bg: #0f1923;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--dark-bg);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* --- The Game Screen --- */
+        #game-layer {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, #1f2933 0%, #0f1923 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .crosshair {
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--gaming-red);
+            border-radius: 50%;
+            position: relative;
+            cursor: crosshair;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 1.5s infinite;
+        }
+
+        .crosshair::before { content: ''; position: absolute; width: 100%; height: 2px; background: var(--gaming-red); }
+        .crosshair::after { content: ''; position: absolute; width: 2px; height: 100%; background: var(--gaming-red); }
+
+        .target {
+            width: 40px;
+            height: 40px;
+            background: var(--gaming-red);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--gaming-red);
+            z-index: 101;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- The Present Screen --- */
+        #present-layer {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            text-align: center;
+        }
+
+        .gift-box {
+            font-size: 120px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .gift-box:hover { transform: scale(1.1) rotate(5deg); }
+
+        .message {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark-bg);
+            margin-top: 20px;
+            display: none;
+            padding: 0 20px;
+        }
+
+        /* --- Visual Polish --- */
+        .instruction {
+            color: white;
+            margin-top: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-layer">
+        <h1 style="color: white; margin-bottom: 50px;">SHOOT THE TARGET</h1>
+        <div class="crosshair" onclick="hitTarget()">
+            <div class="target"></div>
+        </div>
+        <p class="instruction">Aim and Click</p>
+    </div>
+
+    <div id="present-layer">
+        <div id="gift" class="gift-box" onclick="revealMessage()">🎁</div>
+        <div id="finalMsg" class="message">
+            YOU OWE ME <br>
+            <span style="color: var(--gaming-red); font-size: 4rem;">ROUND 2</span> 
+            <br> 😊
+        </div>
+        <p id="hint" style="color: #888;">Click the gift to open</p>
+    </div>
+
+    <script>
+        function hitTarget() {
+            // Sound effect would go here if we had one!
+            const gameLayer = document.getElementById('game-layer');
+            gameLayer.style.transform = 'translateY(-100%)';
+        }
+
+        function revealMessage() {
+            const gift = document.getElementById('gift');
+            const msg = document.getElementById('finalMsg');
+            const hint = document.getElementById('hint');
+
+            // Change emoji to open box
+            gift.innerHTML = '🎊';
+            gift.style.transform = 'scale(1.5)';
+            
+            // Show the text
+            msg.style.display = 'block';
+            hint.style.display = 'none';
+
+            // Confetti effect (simple)
+            for(let i=0; i<20; i++) {
+                createSparkle();
+            }
+        }
+
+        function createSparkle() {
+            const s = document.createElement('div');
+            s.innerHTML = '✨';
+            s.style.position = 'fixed';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.top = Math.random() * 100 + 'vh';
+            s.style.fontSize = '20px';
+            s.style.pointerEvents = 'none';
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 1000);
+        }
+    </script>
+</body>
+</html>
