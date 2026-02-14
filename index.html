@@ -49,8 +49,8 @@
 </head>
 <body>
     
-    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted crossorigin="anonymous" style="display:none;"></video>
-    <audio id="tvAudio" src="song.mp3" crossorigin="anonymous" loop></audio>
+    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted crossorigin="anonymous" style="position: absolute; width: 0; height: 0; left: -9999px;"></video>
+    <audio id="tvAudio" src="song.mp3" crossorigin="anonymous" loop style="position: absolute; width: 0; height: 0; left: -9999px;"></audio>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
@@ -400,7 +400,7 @@
 
         document.getElementById('startBtn').addEventListener('click', () => {
             
-            // 1. THIS IS THE FIX: UNLOCK MEDIA IMMEDIATELY ON CLICK
+            // UNLOCK MEDIA IMMEDIATELY ON CLICK
             videoEl.play().then(() => { videoEl.pause(); videoEl.currentTime = 0; }).catch(e => console.log("Video wait"));
             audioEl.play().then(() => { audioEl.pause(); audioEl.currentTime = 0; }).catch(e => console.log("Audio wait"));
 
@@ -433,8 +433,7 @@
                         videoEl.play().catch(e => console.log(e));
                         audioEl.play().catch(e => console.log(e));
                         
-                        // Let her watch the TV memories for 15 seconds, 
-                        // then zoom into the map while the song keeps playing!
+                        // Wait 15 seconds, then zoom to the map (while song keeps playing)
                         setTimeout(startZoomSequence, 15000); 
                     }
                 }, 100);
