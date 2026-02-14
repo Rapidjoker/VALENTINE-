@@ -2,166 +2,706 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>For Jess - Our Journey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Valentine's Journey · Gaborone</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        canvas { display: block; }
-        
-        button {
-            position: absolute; z-index: 10; padding: 15px 30px;
-            font-size: 20px; font-weight: bold; background-color: #ff4d4d;
-            color: white; border: none; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4); transition: 0.3s;
+        body { margin: 0; overflow: hidden; font-family: 'Georgia', 'Times New Roman', serif; }
+        #instruction {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #b3002d;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid gold;
+            z-index: 20;
+            cursor: pointer;
+            transition: 0.2s;
+            pointer-events: auto;
         }
-        button:hover { background-color: #ff1a1a; }
-        
-        #startBtn { top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px 40px; font-size: 24px; }
-        #nextBtn { bottom: 40px; right: 40px; display: none; }
+        #instruction:hover {
+            background: white;
+            transform: translateX(-50%) scale(1.05);
+            border-color: #ff4d6d;
+        }
+        #page-flip-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            color: gold;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            z-index: 25;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid #ffb3c6;
+        }
+        .note {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            z-index: 15;
+            text-shadow: 1px 1px 2px black;
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
+    <div id="instruction">❤️ Begin Our Valentine's Story ❤️</div>
+    <div id="page-flip-hint">📖 Click the book to turn pages</div>
+    <div class="note">10996 Rametsane → 59866 Shorobe St, Block 7 · Gaborone</div>
 
-    <video id="tvVideo" src="1001189975.mp4" playsinline style="display:none;" loop></video>
-    <video id="parkVideo2" src="1001189978.mp4" playsinline style="display:none;" loop></video>
+    <!-- Import Three.js and add-ons -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
 
-    <button id="startBtn">Enter the Room</button>
-    <button id="nextBtn">Next Chapter ➔</button>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    <script>
+        // --- Setup scene, camera, renderers ---
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        scene.background = new THREE.Color(0x0a0a1a); // deep night blue
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(-2, 2, 6); // start near entrance
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        const light = new THREE.AmbientLight(0xffffff, 1.2);
-        scene.add(light);
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
 
-        const textureLoader = new THREE.TextureLoader();
+        // --- Controls (will be enabled only when user can explore) ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+        controls.maxPolarAngle = Math.PI / 2;
+        controls.target.set(0, 1.2, 0);
+        controls.enabled = false; // initially disabled during story
 
-        // --- SCENE 1: SIMPSONS ROOM IN 3D SPACE ---
+        // --- Lighting (romantic warm) ---
+        const ambient = new THREE.AmbientLight(0x40406b);
+        scene.add(ambient);
+
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        mainLight.position.set(2, 5, 4);
+        mainLight.castShadow = true;
+        mainLight.receiveShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        const d = 5;
+        mainLight.shadow.camera.left = -d;
+        mainLight.shadow.camera.right = d;
+        mainLight.shadow.camera.top = d;
+        mainLight.shadow.camera.bottom = -d;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.PointLight(0x4466aa, 0.5);
+        fillLight.position.set(-2, 1, 3);
+        scene.add(fillLight);
+
+        const lampLight = new THREE.PointLight(0xffaa66, 0.8, 7);
+        lampLight.position.set(1.8, 2.5, 1.2);
+        scene.add(lampLight);
+
+        // --- Build the sitting room (cozy, without address labels) ---
         const roomGroup = new THREE.Group();
+
+        // Floor
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a3c31, roughness: 0.7 });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = 0;
+        floor.receiveShadow = true;
+        roomGroup.add(floor);
+
+        // Walls
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x8a7a6a, roughness: 0.6 });
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(8, 4, 0.3), wallMat);
+        backWall.position.set(0, 2, -2.85);
+        backWall.receiveShadow = true;
+        backWall.castShadow = true;
+        roomGroup.add(backWall);
+
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 6), wallMat);
+        leftWall.position.set(-3.85, 2, 0);
+        leftWall.receiveShadow = true;
+        leftWall.castShadow = true;
+        roomGroup.add(leftWall);
+
+        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 6), wallMat);
+        rightWall.position.set(3.85, 2, 0);
+        rightWall.receiveShadow = true;
+        rightWall.castShadow = true;
+        roomGroup.add(rightWall);
+
+        const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.8 });
+        const ceiling = new THREE.Mesh(new THREE.BoxGeometry(8, 0.2, 6), ceilingMat);
+        ceiling.position.set(0, 4, 0);
+        ceiling.receiveShadow = true;
+        ceiling.castShadow = true;
+        roomGroup.add(ceiling);
+
+        // Couch
+        const couchMat = new THREE.MeshStandardMaterial({ color: 0x6a4e3a, roughness: 0.8 });
+        const couchBase = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 1.2), couchMat);
+        couchBase.position.set(-1.2, 0.25, 1.5);
+        couchBase.castShadow = true;
+        couchBase.receiveShadow = true;
+        roomGroup.add(couchBase);
+        const couchBack = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 0.4), couchMat);
+        couchBack.position.set(-1.2, 0.9, 2.0);
+        couchBack.castShadow = true;
+        couchBack.receiveShadow = true;
+        roomGroup.add(couchBack);
+        const armLeft = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.2), couchMat);
+        armLeft.position.set(-2.4, 0.65, 1.5);
+        armLeft.castShadow = true;
+        armLeft.receiveShadow = true;
+        roomGroup.add(armLeft);
+        const armRight = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.2), couchMat);
+        armRight.position.set(0.0, 0.65, 1.5);
+        armRight.castShadow = true;
+        armRight.receiveShadow = true;
+        roomGroup.add(armRight);
+
+        // Coffee table with remote
+        const tableMat = new THREE.MeshStandardMaterial({ color: 0xaa9977, roughness: 0.4 });
+        const tableTop = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 1.2), tableMat);
+        tableTop.position.set(0.5, 0.55, -0.2);
+        tableTop.castShadow = true;
+        tableTop.receiveShadow = true;
+        roomGroup.add(tableTop);
+        
+        // Remote control (small box with a red button)
+        const remoteMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3 });
+        const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.15), remoteMat);
+        remoteBody.position.set(0.5, 0.65, -0.2); // on table
+        remoteBody.castShadow = true;
+        remoteBody.receiveShadow = true;
+        roomGroup.add(remoteBody);
+        const buttonMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+        const button = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.02), buttonMat);
+        button.rotation.x = 0;
+        button.position.set(0.5, 0.71, -0.18);
+        button.castShadow = true;
+        roomGroup.add(button);
+
+        // TV unit
+        const tvUnitMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 });
+        const tvCabinet = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.8, 0.8), tvUnitMat);
+        tvCabinet.position.set(0, 0.4, -2.2);
+        tvCabinet.castShadow = true;
+        tvCabinet.receiveShadow = true;
+        roomGroup.add(tvCabinet);
+
+        // TV
+        const tvBody = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.3, 0.1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+        tvBody.position.set(0, 1.2, -2.0);
+        tvBody.castShadow = true;
+        tvBody.receiveShadow = true;
+        roomGroup.add(tvBody);
+
+        // Screen (will use video texture)
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 360;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 40px Arial';
+        ctx.fillStyle = 'gold';
+        ctx.textAlign = 'center';
+        ctx.fillText('❤️', canvas.width/2, canvas.height/2);
+        const videoTexture = new THREE.CanvasTexture(canvas);
+        const screenMat = new THREE.MeshStandardMaterial({ map: videoTexture, emissive: 0x222222 });
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.2), screenMat);
+        screen.position.set(0, 1.2, -1.92);
+        roomGroup.add(screen);
+
         scene.add(roomGroup);
 
-        // Load the Simpsons image onto a 3D wall
-        const roomTexture = textureLoader.load('1001230172.jpg');
-        const roomWall = new THREE.Mesh(
-            new THREE.PlaneGeometry(16, 9), 
-            new THREE.MeshBasicMaterial({ map: roomTexture })
-        );
-        roomWall.position.set(0, 0, -5);
-        roomGroup.add(roomWall);
+        // --- Simple humanoid character (will walk to couch) ---
+        const characterGroup = new THREE.Group();
+        // Body
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3355aa });
+        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.8), bodyMat);
+        torso.position.y = 0.4;
+        torso.castShadow = true;
+        torso.receiveShadow = true;
+        characterGroup.add(torso);
+        // Head
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2), headMat);
+        head.position.y = 0.9;
+        head.castShadow = true;
+        head.receiveShadow = true;
+        characterGroup.add(head);
+        // Legs
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x224488 });
+        const legLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4), legMat);
+        legLeft.position.set(-0.15, 0.2, 0);
+        legLeft.castShadow = true;
+        legLeft.receiveShadow = true;
+        characterGroup.add(legLeft);
+        const legRight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4), legMat);
+        legRight.position.set(0.15, 0.2, 0);
+        legRight.castShadow = true;
+        legRight.receiveShadow = true;
+        characterGroup.add(legRight);
+        // Arms
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x3355aa });
+        const armLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5), armMat);
+        armLeft.position.set(-0.3, 0.6, 0);
+        armLeft.rotation.z = 0.2;
+        armLeft.castShadow = true;
+        armLeft.receiveShadow = true;
+        characterGroup.add(armLeft);
+        const armRight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5), armMat);
+        armRight.position.set(0.3, 0.6, 0);
+        armRight.rotation.z = -0.2;
+        armRight.castShadow = true;
+        armRight.receiveShadow = true;
+        characterGroup.add(armRight);
 
-        // The 3D Video Screen mapped perfectly over the drawing's TV
-        const videoEl = document.getElementById('tvVideo');
-        const videoTex = new THREE.VideoTexture(videoEl);
-        const tvScreen = new THREE.Mesh(
-            new THREE.PlaneGeometry(3.6, 2.6), 
-            new THREE.MeshBasicMaterial({ map: videoTex })
-        );
+        characterGroup.position.set(-3, 0, 2.5); // start near entrance
+        characterGroup.rotation.y = 0.5;
+        scene.add(characterGroup);
+
+        // --- Map scene (hidden initially) ---
+        const mapGroup = new THREE.Group();
+        mapGroup.visible = false;
+
+        // Ground plane with subtle map texture
+        const mapPlaneMat = new THREE.MeshStandardMaterial({ color: 0xc0b0a0, roughness: 0.7 });
+        const mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), mapPlaneMat);
+        mapPlane.rotation.x = -Math.PI / 2;
+        mapPlane.position.y = -0.01;
+        mapPlane.receiveShadow = true;
+        mapGroup.add(mapPlane);
+
+        // Grid to simulate city blocks
+        const gridHelper = new THREE.GridHelper(20, 40, 0x8b5a2b, 0x5a3a1a);
+        gridHelper.rotation.x = -Math.PI / 2;
+        gridHelper.position.y = 0;
+        mapGroup.add(gridHelper);
+
+        // Random low buildings
+        const buildingMat = new THREE.MeshStandardMaterial({ color: 0xa52a2a });
+        for (let i = 0; i < 60; i++) {
+            const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, Math.random()*0.5+0.1, 0.2), buildingMat);
+            b.position.set((Math.random()-0.5)*15, 0.05, (Math.random()-0.5)*15);
+            b.castShadow = true;
+            b.receiveShadow = true;
+            mapGroup.add(b);
+        }
+
+        // Start and end markers
+        const startPos = new THREE.Vector3(-6, 0.1, -4);  // approx 10996 Rametsane
+        const endPos = new THREE.Vector3(7, 0.1, 5);     // approx 59866 Shorobe St, Block 7
+
+        const startMarker = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x442200 }));
+        startMarker.position.copy(startPos);
+        mapGroup.add(startMarker);
+
+        const endMarker = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({ color: 0xff4d6d, emissive: 0x330000 }));
+        endMarker.position.copy(endPos);
+        mapGroup.add(endMarker);
+
+        // Car (red)
+        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0xff3333 }));
+        car.castShadow = true;
+        car.receiveShadow = true;
+        mapGroup.add(car);
+
+        // Path curve (simulating GPS route)
+        const points = [
+            startPos.clone(),
+            new THREE.Vector3(-3, 0.1, -1),
+            new THREE.Vector3(0, 0.1, 1),
+            new THREE.Vector3(3, 0.1, 3),
+            endPos.clone()
+        ];
+        const curve = new THREE.CatmullRomCurve3(points);
         
-        // These coordinates place the video directly over the TV in the bottom left
-        tvScreen.position.set(-3.5, -2.1, -4.9); 
-        tvScreen.rotation.z = -0.05; // Slight tilt to match the artwork
-        roomGroup.add(tvScreen);
+        // Visualize path (dashed line)
+        const linePoints = curve.getPoints(100);
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+        const lineMat = new THREE.LineDashedMaterial({ color: 0xffaa00, dashSize: 0.2, gapSize: 0.1 });
+        const pathLine = new THREE.Line(lineGeo, lineMat);
+        pathLine.computeLineDistances();
+        mapGroup.add(pathLine);
 
-        camera.position.set(0, 0, 4);
+        // Address labels (CSS2D)
+        const startDiv = document.createElement('div');
+        startDiv.textContent = '10996 Rametsane';
+        startDiv.style.color = 'gold';
+        startDiv.style.fontSize = '18px';
+        startDiv.style.fontWeight = 'bold';
+        startDiv.style.textShadow = '1px 1px 3px black';
+        const startLabel = new CSS2DObject(startDiv);
+        startLabel.position.copy(startPos.clone().add(new THREE.Vector3(0, 0.5, 0)));
+        mapGroup.add(startLabel);
 
-        // --- SCENE 2: 3D BOOK WITH REAL PHOTO ---
+        const endDiv = document.createElement('div');
+        endDiv.textContent = '59866 Shorobe St, Block 7';
+        endDiv.style.color = '#ffb3c6';
+        endDiv.style.fontSize = '18px';
+        endDiv.style.fontWeight = 'bold';
+        endDiv.style.textShadow = '1px 1px 3px black';
+        const endLabel = new CSS2DObject(endDiv);
+        endLabel.position.copy(endPos.clone().add(new THREE.Vector3(0, 0.5, 0)));
+        mapGroup.add(endLabel);
+
+        scene.add(mapGroup);
+
+        // --- Book (10 pages, interactive) ---
         const bookGroup = new THREE.Group();
         bookGroup.visible = false;
+
+        // Book cover (two halves)
+        const coverMat = new THREE.MeshStandardMaterial({ color: 0x8b1e3f, roughness: 0.3, emissive: 0x220000 });
+        const coverLeft = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 2.4), coverMat);
+        coverLeft.position.set(-0.9, 0, 0);
+        coverLeft.castShadow = true;
+        coverLeft.receiveShadow = true;
+        bookGroup.add(coverLeft);
+
+        const coverRight = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 2.4), coverMat);
+        coverRight.position.set(0.9, 0, 0);
+        coverRight.castShadow = true;
+        coverRight.receiveShadow = true;
+        bookGroup.add(coverRight);
+
+        // Spine
+        const spineMat = new THREE.MeshStandardMaterial({ color: 0x5a0e2a });
+        const spine = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 2.4), spineMat);
+        spine.position.set(0, 0, 0);
+        spine.castShadow = true;
+        spine.receiveShadow = true;
+        bookGroup.add(spine);
+
+        // Pages (10 pages = 5 leaves, each two sides)
+        const pageMat = new THREE.MeshStandardMaterial({ color: 0xfff5e6 });
+        const pages = []; // store for interaction
+
+        // We'll create 5 double-sided leaves (each leaf has two pages: left and right side)
+        // For simplicity, we'll create 10 separate planes arranged in order.
+        const pageWidth = 1.7;
+        const pageHeight = 2.3;
+        const pageDepth = 0.02;
+
+        for (let i = 0; i < 10; i++) {
+            // Decide texture based on page number
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = 512;
+            pageCanvas.height = 512;
+            const pCtx = pageCanvas.getContext('2d');
+            pCtx.fillStyle = '#fff9f0';
+            pCtx.fillRect(0, 0, 512, 512);
+            
+            // Romantic elements
+            pCtx.strokeStyle = '#e31b23';
+            pCtx.lineWidth = 8;
+            pCtx.strokeRect(20, 20, 472, 472);
+            
+            pCtx.font = 'italic 40px "Georgia"';
+            pCtx.fillStyle = '#b3002d';
+            pCtx.textAlign = 'center';
+            
+            if (i === 0) {
+                pCtx.fillText('Our Love Story', 256, 120);
+                pCtx.font = '30px "Georgia"';
+                pCtx.fillText(' Valentine 2026', 256, 400);
+                // draw hearts
+                for (let h=0; h<5; h++) {
+                    pCtx.fillStyle = '#ff4d6d';
+                    pCtx.beginPath();
+                    pCtx.moveTo(150 + h*80, 250);
+                    pCtx.bezierCurveTo(130 + h*80, 200, 80 + h*80, 220, 150 + h*80, 300);
+                    pCtx.bezierCurveTo(220 + h*80, 220, 170 + h*80, 200, 150 + h*80, 250);
+                    pCtx.fill();
+                }
+            } else if (i === 9) {
+                pCtx.fillText('Forever Yours', 256, 256);
+                pCtx.font = '25px "Georgia"';
+                pCtx.fillText('❤️ Gaborone ❤️', 256, 350);
+            } else {
+                pCtx.fillText(`Page ${i+1}`, 256, 200);
+                pCtx.fillText('✨', 256, 300);
+                pCtx.fillText('I love you', 256, 400);
+            }
+            
+            const pageTexture = new THREE.CanvasTexture(pageCanvas);
+            const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(pageWidth, pageDepth, pageHeight), 
+                new THREE.MeshStandardMaterial({ map: pageTexture }));
+            
+            // Position pages in a stack, slightly offset
+            pageMesh.position.set(0, 0.1 + i * 0.03, 0);
+            pageMesh.castShadow = true;
+            pageMesh.receiveShadow = true;
+            pageMesh.userData = { pageIndex: i };
+            bookGroup.add(pageMesh);
+            pages.push(pageMesh);
+        }
+
+        // Position the book nicely
+        bookGroup.position.set(0, 1.0, 2);
+        bookGroup.rotation.y = 0.3;
         scene.add(bookGroup);
 
-        const pageGeo = new THREE.PlaneGeometry(3, 4);
-        
-        // Left Page gets the real photo of you two
-        const photoTex = textureLoader.load('1001191122.jpg');
-        const leftPageMat = new THREE.MeshBasicMaterial({ map: photoTex, side: THREE.DoubleSide });
-        const leftPage = new THREE.Mesh(pageGeo, leftPageMat);
-        leftPage.position.set(-1.5, 0, 0);
-        leftPage.rotation.y = Math.PI / 8;
-        bookGroup.add(leftPage);
+        // --- State management ---
+        let state = 'intro'; // intro, walking, sitting, tvPlaying, zooming, map, book
+        let actionIndex = 0;
+        const actions = [
+            { type: 'walk', targetPos: new THREE.Vector3(-1.2, 0, 1.5), duration: 3.0 }, // walk to couch
+            { type: 'sit', duration: 1.0 },
+            { type: 'pickRemote', duration: 1.0 },
+            { type: 'tvOn', duration: 0.5 }
+        ];
+        let actionStartTime = 0;
+        let actionProgress = 0;
 
-        const rightPage = new THREE.Mesh(pageGeo, new THREE.MeshBasicMaterial({ color: 0xeaf6ff, side: THREE.DoubleSide }));
-        rightPage.position.set(1.5, 0, 0);
-        rightPage.rotation.y = -Math.PI / 8;
-        bookGroup.add(rightPage);
+        let videoPlaying = false;
+        let videoStartTime = 0;
 
-        // Routes
-        const pointsRoute1 = [new THREE.Vector3(0.5, -1.5, 0.2), new THREE.Vector3(1.5, 0, 0.5), new THREE.Vector3(2.5, 1.5, 0.2)];
-        const pointsRoute2 = [new THREE.Vector3(2.5, 1.5, 0.2), new THREE.Vector3(1.0, 1.0, 0.6), new THREE.Vector3(0.5, -1.0, 0.2)];
-        
-        let curve = new THREE.CatmullRomCurve3(pointsRoute1);
-        const routeLine = new THREE.Line(
-            new THREE.BufferGeometry().setFromPoints(curve.getPoints(50)), 
-            new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 })
-        );
-        bookGroup.add(routeLine);
+        let carProgress = 0;
+        const carSpeed = 0.15; // per second
 
-        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0x222222 }));
-        bookGroup.add(car);
+        let currentPage = 0;
+        let bookInteractive = false;
 
-        // --- LOGIC & ANIMATIONS ---
-        let isBookScene = false;
-        let fraction = 0;
+        // Helper to advance story
+        function startNextAction() {
+            if (actionIndex < actions.length) {
+                actionStartTime = performance.now() / 1000;
+                actionProgress = 0;
+            } else {
+                // All intro actions done, now TV video starts
+                state = 'tvPlaying';
+                videoPlaying = true;
+                videoStartTime = performance.now() / 1000;
+                // Turn on TV (flicker effect)
+                flickerTV();
+            }
+        }
 
-        document.getElementById('startBtn').addEventListener('click', () => {
-            document.getElementById('startBtn').style.display = 'none';
-            videoEl.play();
+        function flickerTV() {
+            // Simple flicker: change canvas content rapidly for a few frames
+            let flickerCount = 0;
+            const interval = setInterval(() => {
+                ctx.fillStyle = flickerCount % 2 === 0 ? '#ffffff' : '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                videoTexture.needsUpdate = true;
+                flickerCount++;
+                if (flickerCount > 10) {
+                    clearInterval(interval);
+                    // start video simulation
+                }
+            }, 50);
+        }
 
-            // Wait 4 seconds for her to watch the video, then ZOOM!
-            setTimeout(() => {
-                gsap.to(camera.position, {
-                    x: -3.5, y: -2.1, z: -4.5, // Fly exactly into the TV coordinates
-                    duration: 2, ease: "power2.inOut",
-                    onComplete: () => {
-                        roomGroup.visible = false;
-                        bookGroup.visible = true;
-                        
-                        camera.position.set(0, 0, 6); // Pull back for the book
-                        isBookScene = true;
-                        document.getElementById('nextBtn').style.display = 'block';
+        // Click listener
+        document.getElementById('instruction').addEventListener('click', () => {
+            if (state === 'intro') {
+                state = 'walking';
+                document.getElementById('instruction').style.opacity = '0.5';
+                document.getElementById('instruction').style.pointerEvents = 'none';
+                startNextAction();
+            } else if (state === 'book' && bookInteractive) {
+                // Flip to next page
+                currentPage = (currentPage + 1) % pages.length;
+                // Bring that page to front (visually, we can just rotate the book group or highlight)
+                // For simplicity, we'll rotate the whole book to next page? Better to animate page turning.
+                // Here we'll just make the current page slightly more prominent (move forward)
+                pages.forEach((p, idx) => {
+                    if (idx === currentPage) {
+                        p.position.z = 0.1;
+                    } else {
+                        p.position.z = 0;
                     }
                 });
-            }, 4000);
+            }
         });
 
-        document.getElementById('nextBtn').addEventListener('click', () => {
-            // Swap photo for the 2nd video!
-            const vid2 = document.getElementById('parkVideo2');
-            const tex2 = new THREE.VideoTexture(vid2);
-            leftPage.material.map = tex2;
-            leftPage.material.needsUpdate = true;
-            vid2.play();
+        // Update video frames
+        function updateVideoTexture(time) {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw romantic animation
+            const t = time * 0.8;
+            ctx.fillStyle = 'gold';
+            ctx.beginPath();
+            ctx.arc(200 + Math.sin(t)*40, 150 + Math.cos(t*1.2)*30, 25, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#e31b23';
+            ctx.beginPath();
+            ctx.arc(400 + Math.cos(t*0.9)*35, 200 + Math.sin(t*1.1)*35, 25, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.font = 'bold 50px "Georgia"';
+            ctx.fillStyle = 'white';
+            ctx.fillText('You & Me', 200, 300);
+            ctx.font = '30px Arial';
+            ctx.fillStyle = '#ffb3c6';
+            ctx.fillText(' Valentine', 280, 350);
+            videoTexture.needsUpdate = true;
+        }
 
-            // Change route to FNB Park
-            curve = new THREE.CatmullRomCurve3(pointsRoute2);
-            routeLine.geometry.setFromPoints(curve.getPoints(50));
-            fraction = 0;
-            
-            // Hide button after click
-            document.getElementById('nextBtn').style.display = 'none'; 
-        });
+        // --- Animation loop ---
+        const clock = new THREE.Clock();
 
         function animate() {
-            requestAnimationFrame(animate);
-            if (isBookScene) {
-                bookGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05;
-                fraction += 0.003;
-                if (fraction > 1) fraction = 0;
-                car.position.copy(curve.getPoint(fraction));
+            const delta = clock.getDelta();
+            const elapsed = performance.now() / 1000;
+
+            // State handling
+            if (state === 'walking') {
+                // Move character and camera
+                if (actionIndex === 0) { // walk
+                    actionProgress += delta / actions[0].duration;
+                    if (actionProgress >= 1) {
+                        actionProgress = 1;
+                        actionIndex++;
+                        startNextAction();
+                    }
+                    // Lerp character position
+                    const startPosChar = new THREE.Vector3(-3, 0, 2.5);
+                    const endPosChar = new THREE.Vector3(-1.2, 0, 1.5);
+                    characterGroup.position.lerpVectors(startPosChar, endPosChar, actionProgress);
+                    // Camera follows
+                    camera.position.lerpVectors(new THREE.Vector3(-2, 2, 6), new THREE.Vector3(-1, 1.6, 3), actionProgress);
+                    camera.lookAt(characterGroup.position.clone().add(new THREE.Vector3(0, 1, 0)));
+                } else if (actionIndex === 1) { // sit (lower character)
+                    actionProgress += delta / actions[1].duration;
+                    if (actionProgress >= 1) {
+                        actionProgress = 1;
+                        actionIndex++;
+                        startNextAction();
+                    }
+                    // Scale down character to sitting height
+                    characterGroup.scale.y = 1 - actionProgress * 0.5;
+                    characterGroup.position.y = -0.2 * actionProgress; // sink into couch
+                } else if (actionIndex === 2) { // pick remote
+                    actionProgress += delta / actions[2].duration;
+                    if (actionProgress >= 1) {
+                        actionProgress = 1;
+                        actionIndex++;
+                        startNextAction();
+                    }
+                    // Move remote towards character's hand
+                    const remote = roomGroup.children.find(c => c.material && c.material.color.getHex() === 0x222222);
+                    if (remote) {
+                        remote.position.lerpVectors(new THREE.Vector3(0.5, 0.65, -0.2), new THREE.Vector3(-1.0, 1.2, 1.8), actionProgress);
+                    }
+                } else if (actionIndex === 3) { // tv on
+                    actionProgress += delta / actions[3].duration;
+                    if (actionProgress >= 1) {
+                        actionIndex++; // will trigger tvPlaying in startNextAction
+                        startNextAction();
+                    }
+                }
+            } else if (state === 'tvPlaying') {
+                if (videoPlaying) {
+                    updateVideoTexture(elapsed - videoStartTime);
+                    // After 5 seconds, start zoom
+                    if (elapsed - videoStartTime > 5.0) {
+                        state = 'zooming';
+                        zoomStartTime = elapsed;
+                    }
+                }
+            } else if (state === 'zooming') {
+                const zoomDur = 2.0;
+                const zProgress = (elapsed - zoomStartTime) / zoomDur;
+                if (zProgress >= 1) {
+                    // Switch to map
+                    roomGroup.visible = false;
+                    characterGroup.visible = false;
+                    mapGroup.visible = true;
+                    bookGroup.visible = false; // will appear later
+                    camera.position.set(0, 5, 15);
+                    controls.target.set(0, 0, 0);
+                    controls.enabled = true;
+                    state = 'map';
+                    carProgress = 0;
+                } else {
+                    // Zoom into TV
+                    const startCam = new THREE.Vector3(-1, 1.6, 3);
+                    const endCam = new THREE.Vector3(0, 1.2, -1.5);
+                    camera.position.lerpVectors(startCam, endCam, zProgress);
+                    controls.target.lerpVectors(new THREE.Vector3(-1, 1.2, 1), new THREE.Vector3(0, 1.2, -2), zProgress);
+                }
+            } else if (state === 'map') {
+                // Move car along curve
+                carProgress += delta * carSpeed;
+                if (carProgress >= 1) {
+                    carProgress = 1;
+                    // Car arrived, show book
+                    if (!bookGroup.visible) {
+                        bookGroup.visible = true;
+                        bookInteractive = true;
+                        state = 'book';
+                        // Position book nicely
+                        bookGroup.position.set(0, 1.5, 2);
+                        camera.position.set(0, 2, 5);
+                        controls.target.set(0, 1.5, 2);
+                    }
+                }
+                const point = curve.getPoint(carProgress);
+                car.position.copy(point);
+                // Orient car along path
+                const tangent = curve.getTangent(carProgress);
+                car.rotation.y = Math.atan2(tangent.x, tangent.z);
+            } else if (state === 'book') {
+                // Allow page turning via click (already handled)
             }
+
+            // Update controls if enabled
+            if (controls.enabled) controls.update();
+
+            // Render
             renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+
+            requestAnimationFrame(animate);
         }
+
         animate();
 
+        // --- Resize ---
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
+
     </script>
 </body>
 </html>
