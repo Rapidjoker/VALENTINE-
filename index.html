@@ -9,10 +9,11 @@
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; }
         
+        /* The Pitch Black Opening Screen */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; justify-content: center; align-items: center; z-index: 10;
-            background: rgba(0,0,0,0.9); transition: opacity 1s ease;
+            background: #000000; transition: opacity 2s ease; /* 2-second smooth fade in */
         }
         
         button {
@@ -52,7 +53,7 @@
     <video id="tvVideo" src="our-video.mp4" playsinline style="display:none;" loop></video>
 
     <div id="ui-layer">
-        <button id="startBtn">Enter the Room</button>
+        <button id="startBtn">Enter Our World</button>
     </div>
     <div id="instructions">Click the right side of the book to turn pages</div>
     
@@ -70,12 +71,14 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000000);
         
-        // Start camera further back for the "walk up" effect
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 2, 10); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        // Enable shadows for the 3D city
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const labelRenderer = new CSS2DRenderer();
@@ -86,74 +89,107 @@
         const mouse = new THREE.Vector2();
         const textureLoader = new THREE.TextureLoader();
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
+        
+        // Directional light creates the dramatic shadows on the 3D buildings
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
 
-        // --- SCENE 1: SIMPSONS ROOM (2.5D Setup) ---
+        // --- SCENE 1: SIMPSONS ROOM ---
         const roomGroup = new THREE.Group();
         scene.add(roomGroup);
 
-        // 1. The Backdrop (Simpsons Image)
-        // We use a huge plane right in front of the camera to act as the environment
-        const roomTexture = textureLoader.load('image_28.png'); // USING YOUR UPLOADED IMAGE
-        // Adjust aspect ratio to match image roughly (4:3)
+        const roomTexture = textureLoader.load('image_28.png'); 
         const roomGeo = new THREE.PlaneGeometry(16, 12); 
         const roomMat = new THREE.MeshBasicMaterial({ map: roomTexture, side: THREE.DoubleSide });
         const roomBackdrop = new THREE.Mesh(roomGeo, roomMat);
-        roomBackdrop.position.set(0, 2, -5); // Positioned back in space
+        roomBackdrop.position.set(0, 2, -5); 
         roomGroup.add(roomBackdrop);
 
-        // 2. The 3D Remote
         const remote = new THREE.Mesh(
             new THREE.BoxGeometry(0.2, 0.05, 0.5), 
             new THREE.MeshStandardMaterial({ color: 0x222222 })
         );
-        // Position it to match where the table is in the drawing
         remote.position.set(-1.5, 0.8, -2); 
         remote.rotation.y = -0.2;
         roomGroup.add(remote);
 
-        // 3. The TV Screen (Flicker & Video)
-        // Canvas for static flicker effect
         const flickerCanvas = document.createElement('canvas');
         flickerCanvas.width = 256; flickerCanvas.height = 256;
         const flickerCtx = flickerCanvas.getContext('2d');
         const flickerTexture = new THREE.CanvasTexture(flickerCanvas);
         
-        // Video Texture for real video
         const videoEl = document.getElementById('tvVideo');
         const videoTexture = new THREE.VideoTexture(videoEl);
 
-        // The 3D mesh that sits precisely over the drawn TV
         const tvScreen = new THREE.Mesh(
             new THREE.PlaneGeometry(1.8, 1.4), 
-            new THREE.MeshBasicMaterial({ map: flickerTexture }) // Start with flicker texture
+            new THREE.MeshBasicMaterial({ map: flickerTexture }) 
         );
-        // Coordinates tuned to match the TV position in image_28.png
         tvScreen.position.set(1.65, 0.95, -4.9); 
         roomGroup.add(tvScreen);
 
-        // --- SCENE 2: THE MAP (Gaborone) ---
+        // --- SCENE 2: THE 3D CITY MAP ---
         const mapGroup = new THREE.Group();
         mapGroup.visible = false;
         scene.add(mapGroup);
 
-        const mapFloor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x1b261b }));
+        // Dark asphalt ground
+        const mapFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(80, 80), 
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
+        );
         mapFloor.rotation.x = -Math.PI / 2;
+        mapFloor.receiveShadow = true;
         mapGroup.add(mapFloor);
-        mapGroup.add(new THREE.GridHelper(50, 50, 0x334433, 0x223322));
 
-        const startPos = new THREE.Vector3(-10, 0.5, -8);
-        const endPos = new THREE.Vector3(12, 0.5, 8);
+        // --- GENERATE THE 3D CITY SKYLINE ---
+        const cityGroup = new THREE.Group();
+        const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
+        // A sleek, dark architectural look for the buildings
+        const buildingMat = new THREE.MeshStandardMaterial({ color: 0x2a3b4c, roughness: 0.8 });
+
+        // Create 300 random buildings
+        for (let i = 0; i < 300; i++) {
+            const building = new THREE.Mesh(buildingGeo, buildingMat);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            
+            // Randomly scatter them across a 50x50 area
+            const x = (Math.random() - 0.5) * 50;
+            const z = (Math.random() - 0.5) * 50;
+            
+            // Give them random heights to look like a skyline
+            const height = Math.random() * 8 + 1;
+            building.scale.set(1 + Math.random(), height, 1 + Math.random());
+            
+            building.position.set(x, height / 2, z);
+
+            // Leave a "street" path so they don't block the car's route too much
+            // The route runs roughly diagonal from bottom-left to top-right
+            if (Math.abs(x - z) > 5) { 
+                cityGroup.add(building);
+            }
+        }
+        mapGroup.add(cityGroup);
 
         // Markers & Labels
-        const startMarker = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
+        const startPos = new THREE.Vector3(-12, 0.5, -12);
+        const endPos = new THREE.Vector3(14, 0.5, 14);
+
+        const startMarker = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
         startMarker.position.copy(startPos);
         mapGroup.add(startMarker);
         const startDiv = document.createElement('div'); startDiv.className = 'map-label label-start'; startDiv.textContent = '10996 Rametsane';
         startMarker.add(new CSS2DObject(startDiv));
 
-        const endMarker = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({ color: 0xff69b4 }));
+        const endMarker = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xff69b4 }));
         endMarker.position.copy(endPos);
         mapGroup.add(endMarker);
         const endDiv = document.createElement('div'); endDiv.className = 'map-label label-end'; endDiv.textContent = '59866 Shorobe St, Block 7';
@@ -161,17 +197,18 @@
 
         // The Route
         const routeCurve = new THREE.CatmullRomCurve3([
-            startPos, new THREE.Vector3(-4, 0.5, -4), new THREE.Vector3(2, 0.5, 0), new THREE.Vector3(8, 0.5, 4), endPos
+            startPos, new THREE.Vector3(-6, 0.5, -4), new THREE.Vector3(2, 0.5, 0), new THREE.Vector3(8, 0.5, 6), endPos
         ]);
         const routeLine = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(routeCurve.getPoints(150)),
-            new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 1, gapSize: 0.5, linewidth: 2 })
+            new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 1, gapSize: 0.5, linewidth: 3 })
         );
         routeLine.computeLineDistances();
         mapGroup.add(routeLine);
 
         // The Car
-        const car = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 1.2), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        const car = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 2.0), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        car.castShadow = true;
         mapGroup.add(car);
 
         // --- SCENE 3: THE 10-PAGE BOOK ---
@@ -180,12 +217,11 @@
         scene.add(bookGroup);
         
         const pages = [];
-        // Helper to generate canvas text textures
         function createPageTexture(pageNum, text) {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 1024;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#fff9f0'; ctx.fillRect(0, 0, 512, 1024); // Paper color
+            ctx.fillStyle = '#fff9f0'; ctx.fillRect(0, 0, 512, 1024); 
             ctx.fillStyle = '#4a0000'; 
             
             if(pageNum === 1) {
@@ -204,7 +240,7 @@
         }
 
         const bookContent = [
-            "", // Cover page handled separately
+            "", 
             "Where it all began...", "The first time I saw you smile.", 
             "Every moment since has been better.", "Building our future, brick by brick.", 
             "Through thick and thin.", "You are my rock and my joy.", 
@@ -222,36 +258,33 @@
             bookGroup.add(pivot);
             pages.push({ pivot: pivot, mesh: pageMesh });
         }
-        // Add a back cover
         const backCover = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.2, 0.05), new THREE.MeshStandardMaterial({ color: 0x8b0000 }));
         backCover.position.set(0,0,-0.1);
         bookGroup.add(backCover);
 
         // --- THE CINEMATIC ANIMATION SEQUENCE ---
 
-        let appState = 'room'; // room, map, book
+        let appState = 'room'; 
         let mapProgress = 0;
         let flickerInterval;
 
-        // 1. Start the "Walk" Sequence
         document.getElementById('startBtn').addEventListener('click', () => {
-            document.getElementById('ui-layer').style.opacity = 0;
-            setTimeout(() => document.getElementById('ui-layer').remove(), 1000);
+            // Smoothly fade out the pitch black screen
+            const uiLayer = document.getElementById('ui-layer');
+            uiLayer.style.opacity = 0;
+            setTimeout(() => uiLayer.remove(), 2000); // 2 second fade
 
             const tl = gsap.timeline();
 
-            // "Walk" to the couch (move camera)
             tl.to(camera.position, { 
                 z: 3, y: 1.5, duration: 3, ease: "power2.inOut" 
             }, 0);
 
-            // "Pick up" the remote (float it to camera and hide)
             tl.to(remote.position, { 
                 x: 0, y: 1, z: 2, duration: 1.5, ease: "back.in(1)"
             }, 1.5);
             tl.to(remote.scale, { x:0, y:0, z:0, duration: 0.2 }, 2.9);
 
-            // Turn on TV (Flicker sequence)
             tl.call(() => {
                 let flickerCount = 0;
                 flickerInterval = setInterval(() => {
@@ -259,7 +292,7 @@
                     flickerCtx.fillRect(0,0,256,256);
                     flickerTexture.needsUpdate = true;
                     flickerCount++;
-                    if(flickerCount > 15) { // Stop flickering, play video
+                    if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         tvScreen.material.map = videoTexture;
                         tvScreen.material.needsUpdate = true;
@@ -271,24 +304,22 @@
         });
 
         function startZoomSequence() {
-            // Wait 4 seconds for video to play, then zoom exactly into the TV screen
             gsap.to(camera.position, {
-                x: 1.65, y: 0.95, z: -4.0, // Target TV coordinates
+                x: 1.65, y: 0.95, z: -4.0, 
                 duration: 2.5,
                 delay: 4,
                 ease: "power3.inOut",
                 onComplete: () => {
-                    // Transition to Map
                     roomGroup.visible = false;
                     mapGroup.visible = true;
                     appState = 'map';
-                    camera.position.set(0, 15, 20); // Bird's eye view for map
+                    // Angle the camera to look down at the 3D City
+                    camera.position.set(-15, 25, 25); 
                     camera.lookAt(0, 0, 0);
                 }
             });
         }
 
-        // Book page turning interaction
         window.addEventListener('pointerdown', (e) => {
             if(appState !== 'book') return;
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -305,10 +336,9 @@
             requestAnimationFrame(animate);
 
             if (appState === 'map') {
-                mapProgress += 0.0015; // Speed of car
+                mapProgress += 0.0015; 
                 if (mapProgress >= 1) {
                     mapProgress = 1;
-                    // Transition to Book
                     if(mapGroup.visible) {
                          mapGroup.visible = false;
                          bookGroup.visible = true;
@@ -321,11 +351,14 @@
                     const currentPos = routeCurve.getPoint(mapProgress);
                     car.position.copy(currentPos);
                     car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
+                    
+                    // Optional: Make the camera follow the car through the city!
+                    // camera.position.set(currentPos.x - 10, currentPos.y + 10, currentPos.z + 10);
+                    // camera.lookAt(currentPos);
                 }
             }
 
             if (appState === 'book') {
-                // Smooth page turning logic
                 pages.forEach(p => {
                     const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.9 : 0;
                     p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.1;
