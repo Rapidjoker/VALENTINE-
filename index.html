@@ -8,8 +8,8 @@
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
-        /* THE FIX: We tell the text container to stay hidden by default */
-        #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; display: none; }
+        /* THE TEXT FIX: We start it at 0 opacity so it is completely invisible initially */
+        #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
         
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -17,6 +17,12 @@
             background: #000000; transition: opacity 1.5s ease; 
         }
         
+        /* THE TRANSITION LAYER: This creates the smooth movie fade effect */
+        #transition-overlay {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #2a0510; opacity: 0; pointer-events: none; z-index: 15;
+        }
+
         button {
             padding: 20px 40px; font-size: 24px; font-weight: bold; background-color: #e63946;
             color: white; border: none; border-radius: 50px; cursor: pointer;
@@ -51,12 +57,13 @@
 </head>
 <body>
     
-    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="display:none;"></video>
+    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="position: absolute; width: 1px; height: 1px; opacity: 0;"></video>
     <audio id="tvAudio" src="song.mp3" loop style="display:none;"></audio>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
     </div>
+    <div id="transition-overlay"></div>
     <div id="instructions">Click the right side of the book to turn pages</div>
     
     <div id="webgl-container"></div>
@@ -398,6 +405,7 @@
 
         let appState = 'room'; 
         let mapProgress = 0;
+        let isTransitioning = false; // Prevents the map from looping when done
         let flickerInterval;
 
         document.getElementById('startBtn').addEventListener('click', () => {
@@ -450,14 +458,52 @@
                     roomGroup.visible = false;
                     mapGroup.visible = true;
                     
-                    // THE FIX: We turn the map text ON only when the map appears
-                    cssContainer.style.display = 'block';
+                    // FADE IN THE MAP TEXT SMOOTHLY
+                    cssContainer.style.opacity = 1;
                     
                     appState = 'map';
                     camera.position.set(-15, 25, 25); 
                     camera.lookAt(0, 0, 0);
                 }
             });
+        }
+
+        // --- THE NEW CINEMATIC TRANSITION FROM MAP TO BOOK ---
+        function startBookTransition() {
+            if(isTransitioning) return;
+            isTransitioning = true;
+            
+            // 1. INSTANTLY FADE OUT THE MAP TEXT
+            cssContainer.style.opacity = 0;
+
+            const tl = gsap.timeline();
+            
+            // 2. Swoop the camera down directly into the pink destination marker!
+            tl.to(camera.position, { x: 14, y: 1, z: 15, duration: 2, ease: "power2.in" }, 0);
+            
+            // 3. Fade the screen to a deep romantic burgundy
+            tl.to("#transition-overlay", { opacity: 1, duration: 1 }, 1);
+            
+            // 4. While the screen is completely covered by the overlay, swap the 3D models
+            tl.call(() => {
+                mapGroup.visible = false;
+                bookGroup.visible = true;
+                heartParticles.visible = true; 
+                scene.background.setHex(0x2a0510);
+                
+                // Position camera right in front of the book
+                camera.position.set(0, 1, 6);
+                camera.lookAt(0, 0, 0);
+            }, null, 2);
+
+            // 5. Fade the overlay back out to reveal the book!
+            tl.to("#transition-overlay", { opacity: 0, duration: 1.5 }, 2.5);
+            
+            // 6. Give control to the user
+            tl.call(() => {
+                appState = 'book';
+                document.getElementById('instructions').style.display = 'block';
+            }, null, 4);
         }
 
         window.addEventListener('pointerdown', (e) => {
@@ -476,28 +522,17 @@
             requestAnimationFrame(animate);
 
             if (appState === 'map') {
-                mapProgress += 0.0015; 
-                if (mapProgress >= 1) {
-                    mapProgress = 1;
-                    if(mapGroup.visible) {
-                         mapGroup.visible = false;
-                         bookGroup.visible = true;
-                         heartParticles.visible = true; 
-                         
-                         // THE FIX: We instantly turn the map text OFF when the book appears
-                         cssContainer.style.display = 'none';
-                         
-                         scene.background.setHex(0x2a0510);
-                         
-                         appState = 'book';
-                         camera.position.set(0, 1, 6);
-                         camera.lookAt(0, 0, 0);
-                         document.getElementById('instructions').style.display = 'block';
+                if (!isTransitioning) {
+                    mapProgress += 0.0015; 
+                    if (mapProgress >= 1) {
+                        mapProgress = 1;
+                        // TRIGGER THE COOL TRANSITION
+                        startBookTransition();
+                    } else {
+                        const currentPos = routeCurve.getPoint(mapProgress);
+                        car.position.copy(currentPos);
+                        car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
                     }
-                } else {
-                    const currentPos = routeCurve.getPoint(mapProgress);
-                    car.position.copy(currentPos);
-                    car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
                 }
             }
 
