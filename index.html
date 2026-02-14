@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For Jess - Safe Test</title>
+    <title>For Jess - Happy Valentine's Day</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
@@ -66,7 +66,7 @@
         const container = document.getElementById('webgl-container');
         const cssContainer = document.getElementById('css2d-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000); // Starts black until button clicked
+        scene.background = new THREE.Color(0x000000); 
         
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 4.5, 7); 
@@ -84,10 +84,8 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
-        
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
         dirLight.position.set(2, 8, 5);
         dirLight.castShadow = true;
@@ -173,8 +171,6 @@
         flickerCanvas.width = 512; flickerCanvas.height = 256;
         const flickerCtx = flickerCanvas.getContext('2d');
         const flickerTexture = new THREE.CanvasTexture(flickerCanvas);
-        
-        // Initial TV screen is off (black)
         flickerCtx.fillStyle = '#111111';
         flickerCtx.fillRect(0, 0, 512, 256);
 
@@ -200,13 +196,11 @@
             const building = new THREE.Mesh(buildingGeo, buildingMat);
             building.castShadow = true;
             building.receiveShadow = true;
-            
             const x = (Math.random() - 0.5) * 50;
             const z = (Math.random() - 0.5) * 50;
             const height = Math.random() * 8 + 1;
             building.scale.set(1 + Math.random(), height, 1 + Math.random());
             building.position.set(x, height / 2, z);
-
             if (Math.abs(x - z) > 5) cityGroup.add(building);
         }
         mapGroup.add(cityGroup);
@@ -240,54 +234,128 @@
         car.castShadow = true;
         mapGroup.add(car);
 
-        // --- SCENE 3: THE 10-PAGE BOOK ---
+        // --- SCENE 3: THE REALISTIC 10-PAGE BOOK ---
         const bookGroup = new THREE.Group();
         bookGroup.visible = false;
         scene.add(bookGroup);
         
         const pages = [];
-        function createPageTexture(pageNum, text) {
+
+        // Helper function to draw a beautiful heart shape
+        function drawHeart(ctx, x, y, width, height) {
+            ctx.save();
+            ctx.beginPath();
+            const topCurveHeight = height * 0.3;
+            ctx.moveTo(x, y + topCurveHeight);
+            ctx.bezierCurveTo(x, y, x - width / 2, y, x - width / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x - width / 2, y + (height + topCurveHeight) / 2, x, y + (height + topCurveHeight) / 2, x, y + height);
+            ctx.bezierCurveTo(x, y + (height + topCurveHeight) / 2, x + width / 2, y + (height + topCurveHeight) / 2, x + width / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x + width / 2, y, x, y, x, y + topCurveHeight);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(255, 77, 77, 0.6)";
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Helper function to wrap long paragraphs naturally
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            for(let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        // The Engine that generates realistic paper textures
+        function createPageTexture(pageNum, title, text) {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 1024;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#fff9f0'; ctx.fillRect(0, 0, 512, 1024); 
-            ctx.fillStyle = '#4a0000'; 
+            
+            // Base Paper Color (Warm parchment)
+            ctx.fillStyle = '#fdf6e3'; 
+            ctx.fillRect(0, 0, 512, 1024); 
+
+            // Simulate the shadow of the book spine to make the paper look 3D
+            const spineGradient = ctx.createLinearGradient(0, 0, 50, 0);
+            spineGradient.addColorStop(0, 'rgba(0,0,0,0.15)');
+            spineGradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = spineGradient;
+            ctx.fillRect(0, 0, 50, 1024);
+
+            // Draw decorative hearts
+            drawHeart(ctx, 256, 850, 60, 60);
+            if(pageNum === 1) drawHeart(ctx, 256, 150, 100, 100);
+
+            // Typography Setup
+            ctx.fillStyle = '#3a2b25'; // Dark, warm ink color
             
             if(pageNum === 1) {
-                 ctx.font = 'bold 50px serif'; ctx.textAlign = 'center';
-                 ctx.fillText("Our Story", 256, 300);
-                 ctx.font = 'italic 30px serif';
-                 ctx.fillText("For Jess", 256, 400);
-                 ctx.fillText("Happy Valentine's Day", 256, 500);
+                 ctx.font = 'bold 60px "Georgia", serif'; ctx.textAlign = 'center';
+                 ctx.fillText("Our Story", 256, 400);
+                 ctx.font = 'italic 35px "Georgia", serif';
+                 ctx.fillText("For my beautiful Jess", 256, 500);
+                 ctx.fillText("Happy Valentine's Day", 256, 580);
             } else {
-                ctx.font = 'bold 40px serif'; ctx.textAlign = 'center';
-                ctx.fillText(`Chapter ${pageNum-1}`, 256, 150);
-                ctx.font = 'italic 30px serif';
-                ctx.fillText(text, 256, 400);
+                ctx.font = 'bold 35px "Georgia", serif'; ctx.textAlign = 'center';
+                ctx.fillText(title, 256, 120);
+                
+                // Write the long paragraphs
+                ctx.font = 'italic 28px "Georgia", serif';
+                ctx.textAlign = 'left';
+                wrapText(ctx, text, 60, 250, 400, 45); // Automatically wraps the text
             }
             return new THREE.CanvasTexture(canvas);
         }
 
-        const bookContent = [
-            "", 
-            "Where it all began...", "The first time I saw you smile.", 
-            "Every moment since has been better.", "Building our future, brick by brick.", 
-            "Through thick and thin.", "You are my rock and my joy.", 
-            "Beautiful inside and out.", "My favorite person in the world.", "I love you, forever."
+        // Your Custom Love Letters
+        const bookChapters = [
+            { title: "", text: "" }, // Cover (handled above)
+            { title: "Chapter 1: The Beginning", text: "From the very first moment I saw you, I knew my life was about to change. There was a light in your eyes that drew me in, and a warmth in your smile that felt instantly like coming home." },
+            { title: "Chapter 2: The Little Things", text: "Every single day we spend together, I discover something new to love about you. You have this incredible, effortless ability to make the world around you so much brighter." },
+            { title: "Chapter 3: Through My Eyes", text: "I know that sometimes you might doubt yourself, or wonder if you are enough. But I want you to look at yourself the way I see you. You are brilliant, you are resilient, and you are absolutely breathtaking." },
+            { title: "Chapter 4: My Safe Place", text: "Whether we are laughing until we can't breathe, exploring the city together, or just sitting in quiet comfort, there is nowhere else I would rather be. You are my safe place, Jess." },
+            { title: "Chapter 5: Your Heart", text: "I love the way your mind works. I love your passion, your immense kindness, and the gentle, caring way you treat the people around you. You have a heart of absolute gold." },
+            { title: "Chapter 6: My Promise", text: "I promise to always be your biggest cheerleader. On the days when you feel on top of the world, I will be right there celebrating. And on the days when things feel heavy, I will hold your hand through the storm." },
+            { title: "Chapter 7: Your Worth", text: "You are the most beautiful part of my life, both inside and out. Please never forget your worth, Jess. You are a masterpiece, and I am the luckiest person in the world to call you mine." },
+            { title: "Chapter 8: Our Future", text: "As we keep driving forward, building our future together step by step, I want you to know that my love for you only grows deeper. I am so incredibly excited for every tomorrow I get to spend with you." },
+            { title: "Chapter 9: Forever", text: "Thank you for being exactly who you are. Thank you for letting me love you, and for loving me back. Jess, never forget how incredibly special you are. You mean a lot to me. Happy Valentine's Day, my love." }
         ];
 
         for(let i = 0; i < 10; i++) {
             const pivot = new THREE.Group();
             pivot.position.set(-1.5, 0, (10 - i) * 0.01); 
-            const pageMat = new THREE.MeshStandardMaterial({ map: createPageTexture(i+1, bookContent[i]), side: THREE.DoubleSide });
-            const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.02), pageMat);
+            
+            // Added slight roughness to make it look like non-reflective paper
+            const pageMat = new THREE.MeshStandardMaterial({ 
+                map: createPageTexture(i+1, bookChapters[i].title, bookChapters[i].text), 
+                side: THREE.DoubleSide,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+            const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.015), pageMat);
             pageMesh.position.set(1.5, 0, 0); 
             pageMesh.userData = { id: i, flipped: false };
             pivot.add(pageMesh);
             bookGroup.add(pivot);
             pages.push({ pivot: pivot, mesh: pageMesh });
         }
-        const backCover = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.2, 0.05), new THREE.MeshStandardMaterial({ color: 0x8b0000 }));
+        
+        // Velvet-like Dark Red Cover
+        const backCover = new THREE.Mesh(
+            new THREE.BoxGeometry(3.2, 4.2, 0.05), 
+            new THREE.MeshStandardMaterial({ color: 0x5a0000, roughness: 1.0 })
+        );
         backCover.position.set(0,0,-0.1);
         bookGroup.add(backCover);
 
@@ -304,21 +372,11 @@
 
             const tl = gsap.timeline();
 
-            // 1. Walk to the couch
-            tl.to(camera.position, { 
-                z: 2.5, y: 2.5, duration: 2, ease: "power2.inOut" 
-            }, 0);
-
-            // 2. Pick up the remote
-            tl.to(remoteGroup.position, { 
-                x: 0.5, y: 1.8, z: 1.5, duration: 1, ease: "back.in(1)"
-            }, 1.5);
+            tl.to(camera.position, { z: 2.5, y: 2.5, duration: 2, ease: "power2.inOut" }, 0);
+            tl.to(remoteGroup.position, { x: 0.5, y: 1.8, z: 1.5, duration: 1, ease: "back.in(1)" }, 1.5);
             tl.to(remoteGroup.rotation, { x: 0.5 }, 1.5);
-            
-            // "Click" and hide it
             tl.to(remoteGroup.scale, { x:0, y:0, z:0, duration: 0.2 }, 2.5);
 
-            // 3. Flicker the TV
             tl.call(() => {
                 let flickerCount = 0;
                 flickerInterval = setInterval(() => {
@@ -330,7 +388,6 @@
                     if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         
-                        // FAKE VIDEO SCREEN FOR LOCAL TESTING
                         flickerCtx.fillStyle = '#111111';
                         flickerCtx.fillRect(0,0,512,256);
                         flickerCtx.fillStyle = '#ff4d4d';
@@ -348,9 +405,9 @@
 
         function startZoomSequence() {
             gsap.to(camera.position, {
-                x: 0, y: 2.75, z: -3.8, // Zoom right to the TV screen!
+                x: 0, y: 2.75, z: -3.8, 
                 duration: 2.5,
-                delay: 4, // Gives you 4 seconds to read the fake screen
+                delay: 4, 
                 ease: "power3.inOut",
                 onComplete: () => {
                     roomGroup.visible = false;
@@ -397,9 +454,10 @@
             }
 
             if (appState === 'book') {
+                // Creates the smooth, realistic page-turning hinge effect
                 pages.forEach(p => {
-                    const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.9 : 0;
-                    p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.1;
+                    const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.95 : 0;
+                    p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.08;
                 });
             }
 
