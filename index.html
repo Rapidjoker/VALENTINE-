@@ -2,696 +2,220 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Journey - Interactive Experience</title>
+    <title>Jess & Renee - Our Journey</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap');
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Loading Screen */
+        #loading {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: white; display: flex; 
+            justify-content: center; align-items: center; z-index: 100;
         }
 
-        body {
-            font-family: 'Cormorant Garamond', serif;
-            overflow: hidden;
-            background: #0a0a0a;
-            cursor: none;
-        }
-
-        /* Custom Cursor */
-        .cursor {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.15s ease, background 0.2s ease;
-            mix-blend-mode: difference;
-        }
-
-        .cursor.active {
-            transform: scale(1.5);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Scene Container */
-        .scene {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            perspective: 1500px;
-            transition: all 1.5s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-
-        /* Living Room Scene */
-        .living-room {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: linear-gradient(135deg, #1a1410 0%, #2d2520 50%, #1a1410 100%);
-            opacity: 1;
-            transition: opacity 1.5s ease;
-        }
-
-        .living-room::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse at 30% 40%, rgba(255, 200, 150, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 60%, rgba(150, 100, 80, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .floor {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-            background: linear-gradient(to bottom, 
-                rgba(60, 40, 30, 0) 0%,
-                rgba(40, 30, 25, 0.5) 50%,
-                rgba(30, 20, 15, 0.8) 100%);
-            transform: rotateX(60deg);
-            transform-origin: bottom;
-        }
-
-        /* TV Stand & TV */
-        .tv-stand {
-            position: absolute;
-            bottom: 25%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 80px;
-            background: linear-gradient(to bottom, #3a2a20, #2a1a10);
-            border-radius: 10px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.6),
-                inset 0 -2px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .tv-container {
-            position: absolute;
-            bottom: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: all 2s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-
-        .scene.zooming .tv-container {
-            transform: translateX(-50%) scale(5);
-            opacity: 0;
-        }
-
-        .tv {
-            width: 500px;
-            height: 300px;
-            background: #000;
-            border: 15px solid #1a1a1a;
-            border-radius: 8px;
-            position: relative;
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.8),
-                inset 0 0 20px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-        }
-
-        .tv::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.05) 0%, 
-                transparent 50%, 
-                rgba(0, 0, 0, 0.3) 100%);
-            pointer-events: none;
-            border-radius: 4px;
-        }
-
-        .tv-screen {
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            position: relative;
-            overflow: hidden;
-            border-radius: 4px;
-        }
-
-        .play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        /* UI Buttons */
+        button {
+            position: absolute; z-index: 10; padding: 15px 35px;
+            font-size: 18px; font-weight: bold; background-color: #ff4d4d;
+            color: white; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.6); 
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-transform: uppercase; letter-spacing: 1px;
         }
-
-        .play-button:hover {
-            transform: translate(-50%, -50%) scale(1.1);
-            background: rgba(255, 255, 255, 1);
-        }
-
-        .play-button::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 25px solid #000;
-            border-top: 15px solid transparent;
-            border-bottom: 15px solid transparent;
-            margin-left: 5px;
-        }
-
-        .play-button.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        video.playing {
-            opacity: 1;
-        }
-
-        /* Book Scene */
-        .book-scene {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1s ease;
-            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4bf 100%);
-            perspective: 2000px;
-        }
-
-        .book-scene.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .book {
-            width: 800px;
-            height: 600px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 2s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-
-        .book.closed {
-            transform: rotateY(0deg);
-        }
-
-        .book.opening {
-            transform: rotateY(-20deg);
-        }
-
-        .book-cover {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
-            border-radius: 10px;
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.4),
-                inset 0 0 30px rgba(0, 0, 0, 0.3);
-            transform-style: preserve-3d;
-            transition: transform 2s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-
-        .book.opening .book-cover {
-            transform: rotateY(-170deg);
-            transform-origin: left;
-        }
-
-        .book-cover::before {
-            content: 'Our Journey';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Playfair Display', serif;
-            font-size: 48px;
-            font-weight: 700;
-            color: #f5e6d3;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            letter-spacing: 4px;
-        }
-
-        .book-pages {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            background: #faf8f3;
-            border-radius: 0 10px 10px 0;
-            display: flex;
-            opacity: 0;
-            transition: opacity 1s ease 2s;
-            box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .book.opening .book-pages {
-            opacity: 1;
-        }
-
-        .page-left, .page-right {
-            flex: 1;
-            padding: 60px;
-            position: relative;
-        }
-
-        .page-left {
-            border-right: 2px solid rgba(139, 69, 19, 0.1);
-        }
-
-        .photo-frame {
-            width: 100%;
-            height: 350px;
-            background: #fff;
-            border: 15px solid #8b4513;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            color: #8b4513;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .photo-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .location-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            color: #654321;
-            text-align: center;
-            margin-top: 15px;
-            font-style: italic;
-        }
-
-        /* 3D Map Route */
-        .map-container {
-            width: 100%;
-            height: 400px;
-            position: relative;
-            perspective: 1200px;
-            margin-top: 20px;
-        }
-
-        .map-3d {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            background: linear-gradient(to bottom, #a8d5e2 0%, #c9e4ca 100%);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .route-path {
-            position: absolute;
-            top: 20%;
-            left: 10%;
-            width: 80%;
-            height: 60%;
-        }
-
-        .route-line {
-            stroke: #8b4513;
-            stroke-width: 4;
-            fill: none;
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            animation: drawRoute 4s ease-in-out 3s forwards;
-        }
-
-        @keyframes drawRoute {
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        .location-marker {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: #d32f2f;
-            border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .location-marker::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border-radius: 50%;
-        }
-
-        .marker-start {
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .marker-end {
-            top: 70%;
-            left: 75%;
-            animation-delay: 3s;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: rotate(-45deg) scale(1);
-            }
-            50% {
-                transform: rotate(-45deg) scale(1.2);
-            }
-        }
-
-        .car {
-            position: absolute;
-            width: 40px;
-            height: 30px;
-            background: #2196f3;
-            border-radius: 5px;
-            top: 20%;
-            left: 10%;
-            transform-origin: center;
-            opacity: 0;
-            animation: moveCar 5s ease-in-out 3s forwards;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .car::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: 10px;
-            width: 20px;
-            height: 15px;
-            background: #1976d2;
-            border-radius: 3px 3px 0 0;
-        }
-
-        @keyframes moveCar {
-            0% {
-                top: 20%;
-                left: 10%;
-                opacity: 1;
-                transform: rotate(0deg);
-            }
-            30% {
-                top: 35%;
-                left: 35%;
-                transform: rotate(25deg);
-            }
-            60% {
-                top: 55%;
-                left: 58%;
-                transform: rotate(10deg);
-            }
-            100% {
-                top: 70%;
-                left: 75%;
-                opacity: 1;
-                transform: rotate(0deg);
-            }
-        }
-
-        .location-label {
-            position: absolute;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #654321;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 10px;
-            border-radius: 5px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .label-start {
-            top: 10%;
-            left: 10%;
-        }
-
-        .label-end {
-            top: 75%;
-            left: 60%;
-        }
-
-        /* Ambient particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: float 20s infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(50px);
-                opacity: 0;
-            }
-        }
+        button:hover { background-color: #ff1a1a; transform: scale(1.1); box-shadow: 0 0 40px rgba(255, 77, 77, 0.9); }
+        
+        #startBtn { top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; }
+        #nextBtn { bottom: 50px; right: 50px; display: none; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-    <!-- Custom Cursor -->
-    <div class="cursor"></div>
 
-    <!-- Particles -->
-    <div class="particles" id="particles"></div>
+    <div id="loading">Loading our world...</div>
 
-    <!-- Main Scene -->
-    <div class="scene" id="scene">
-        <!-- Living Room -->
-        <div class="living-room" id="livingRoom">
-            <div class="floor"></div>
-            
-            <div class="tv-container" id="tvContainer">
-                <div class="tv" id="tv">
-                    <div class="tv-screen">
-                        <div class="play-button" id="playButton"></div>
-                        <video id="video" src="">
-                            <!-- Replace with your video URL -->
-                            <!-- <source src="your-video.mp4" type="video/mp4"> -->
-                        </video>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tv-stand"></div>
-        </div>
+    <video id="tvVideo" src="1001189975.mp4" playsinline style="display:none;" loop crossorigin="anonymous"></video>
+    <video id="parkVideo" src="1001189978.mp4" playsinline style="display:none;" loop crossorigin="anonymous"></video>
 
-        <!-- Book Scene -->
-        <div class="book-scene" id="bookScene">
-            <div class="book closed" id="book">
-                <div class="book-cover"></div>
-                <div class="book-pages">
-                    <div class="page-left">
-                        <div class="photo-frame">
-                            <!-- Add your couple photo here -->
-                            <img src="" alt="Us" id="couplePhoto">
-                            <!-- If no image, placeholder text shows -->
-                            <span id="photoPlaceholder">Your Photo Here</span>
-                        </div>
-                        <div class="location-text">Gaborone to Shorobe</div>
-                    </div>
-                    <div class="page-right">
-                        <div class="map-container">
-                            <div class="map-3d">
-                                <svg class="route-path" viewBox="0 0 400 300">
-                                    <path class="route-line" d="M 40 60 Q 150 100 220 180 T 300 240" />
-                                </svg>
-                                
-                                <div class="location-marker marker-start"></div>
-                                <div class="location-marker marker-end"></div>
-                                <div class="car"></div>
-                                
-                                <div class="location-label label-start">
-                                    Gaborone<br>
-                                    <small>10996 Rametsane</small>
-                                </div>
-                                <div class="location-label label-end">
-                                    Shorobe<br>
-                                    <small>59866 Shorobe St</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <button id="startBtn">Enter Room</button>
+    <button id="nextBtn">Next Chapter ➔</button>
 
     <script>
-        // Custom cursor
-        const cursor = document.querySelector('.cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-        // Cursor interactions
-        document.querySelectorAll('button, .play-button, .tv').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
-        });
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+        scene.add(ambientLight);
 
-        // Create particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
-        }
+        const textureLoader = new THREE.TextureLoader();
+        const manager = new THREE.LoadingManager();
 
-        // Main interaction logic
-        const playButton = document.getElementById('playButton');
-        const video = document.getElementById('video');
-        const scene = document.getElementById('scene');
-        const livingRoom = document.getElementById('livingRoom');
-        const bookScene = document.getElementById('bookScene');
-        const book = document.getElementById('book');
-        const couplePhoto = document.getElementById('couplePhoto');
-        const photoPlaceholder = document.getElementById('photoPlaceholder');
+        // --- SCENE 1: THE SIMPSONS 3D ROOM ---
+        const roomGroup = new THREE.Group();
+        scene.add(roomGroup);
 
-        // Set your video URL here
-        const VIDEO_URL = 'your-video-url.mp4'; // Replace with actual video URL
-        
-        // Set your photo URL here
-        const PHOTO_URL = 'your-photo-url.jpg'; // Replace with actual photo URL
-
-        // Load media
-        if (VIDEO_URL && VIDEO_URL !== 'your-video-url.mp4') {
-            video.src = VIDEO_URL;
-        }
-        
-        if (PHOTO_URL && PHOTO_URL !== 'your-photo-url.jpg') {
-            couplePhoto.src = PHOTO_URL;
-            photoPlaceholder.style.display = 'none';
-        }
-
-        playButton.addEventListener('click', () => {
-            playButton.classList.add('hidden');
-            video.classList.add('playing');
-            video.play();
-        });
-
-        // When video ends, zoom in and transition to book
-        video.addEventListener('ended', () => {
-            // Zoom into TV
-            scene.classList.add('zooming');
+        // 1. The Wall (Your Simpsons Image)
+        textureLoader.load('1001230172.jpg', (tex) => {
+            const aspect = 16 / 9; 
+            const geometry = new THREE.PlaneGeometry(20, 20 / aspect);
+            const material = new THREE.MeshBasicMaterial({ map: tex });
+            const wall = new THREE.Mesh(geometry, material);
+            wall.position.z = -5;
+            roomGroup.add(wall);
             
-            // After zoom, hide living room and show book
-            setTimeout(() => {
-                livingRoom.style.opacity = '0';
-                bookScene.classList.add('active');
-                
-                // Open book after a brief moment
-                setTimeout(() => {
-                    book.classList.remove('closed');
-                    book.classList.add('opening');
-                }, 500);
-            }, 1500);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('startBtn').style.display = 'block';
         });
 
-        // For testing without video - click TV after 3 seconds
-        setTimeout(() => {
-            if (!video.src || video.src.includes('your-video')) {
-                playButton.addEventListener('click', () => {
-                    playButton.classList.add('hidden');
-                    
-                    // Simulate video ending after 3 seconds
-                    setTimeout(() => {
-                        scene.classList.add('zooming');
+        // 2. The TV Screen (Your Real Video)
+        const video1 = document.getElementById('tvVideo');
+        const videoTex1 = new THREE.VideoTexture(video1);
+        const tvGeometry = new THREE.PlaneGeometry(4.5, 3.2); 
+        const tvMaterial = new THREE.MeshBasicMaterial({ map: videoTex1 });
+        const tvScreen = new THREE.Mesh(tvGeometry, tvMaterial);
+        
+        tvScreen.position.set(-3.8, -2.5, -4.9); 
+        tvScreen.rotation.z = 0.02; 
+        roomGroup.add(tvScreen);
+
+        // --- SCENE 2: THE 3D BOOK ---
+        const bookGroup = new THREE.Group();
+        bookGroup.visible = false;
+        scene.add(bookGroup);
+
+        const pageGeo = new THREE.PlaneGeometry(3.5, 5);
+
+        // Left Page
+        const photoTex = textureLoader.load('1001191122.jpg');
+        const leftPageMat = new THREE.MeshBasicMaterial({ map: photoTex, side: THREE.DoubleSide });
+        const leftPage = new THREE.Mesh(pageGeo, leftPageMat);
+        leftPage.position.set(-1.75, 0, 0);
+        leftPage.rotation.y = Math.PI / 8; 
+        bookGroup.add(leftPage);
+
+        // Right Page
+        const rightPage = new THREE.Mesh(pageGeo, new THREE.MeshBasicMaterial({ color: 0xe6f3ff, side: THREE.DoubleSide }));
+        rightPage.position.set(1.75, 0, 0);
+        rightPage.rotation.y = -Math.PI / 8;
+        bookGroup.add(rightPage);
+
+        // Add Map Decorations
+        const mapTexture = new THREE.CanvasTexture(createMapCanvas());
+        rightPage.material.map = mapTexture;
+        rightPage.material.needsUpdate = true;
+
+        // --- THE CAR & ROUTE ---
+        const route1 = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0.5, -1.5, 0.2),
+            new THREE.Vector3(1.5, 0, 0.5),
+            new THREE.Vector3(2.5, 1.5, 0.2)
+        ]);
+
+        const route2 = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(2.5, 1.5, 0.2),
+            new THREE.Vector3(1.0, 1.0, 0.6),
+            new THREE.Vector3(0.5, -1.0, 0.2)
+        ]);
+
+        let currentRoute = route1;
+        
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(currentRoute.getPoints(50));
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+        const routeLine = new THREE.Line(lineGeo, lineMat);
+        bookGroup.add(routeLine);
+
+        const car = new THREE.Mesh(
+            new THREE.BoxGeometry(0.4, 0.2, 0.2), 
+            new THREE.MeshBasicMaterial({ color: 0x3366ff })
+        );
+        bookGroup.add(car);
+
+        camera.position.z = 5;
+
+        // --- INTERACTION LOGIC ---
+        
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('startBtn').style.display = 'none';
+            video1.play(); 
+
+            setTimeout(() => {
+                gsap.to(camera.position, {
+                    x: -3.8, 
+                    y: -2.5, 
+                    z: -4.0, 
+                    duration: 2.5,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        roomGroup.visible = false;
+                        bookGroup.visible = true;
                         
-                        setTimeout(() => {
-                            livingRoom.style.opacity = '0';
-                            bookScene.classList.add('active');
-                            
-                            setTimeout(() => {
-                                book.classList.remove('closed');
-                                book.classList.add('opening');
-                            }, 500);
-                        }, 1500);
-                    }, 3000);
+                        camera.position.set(0, 0, 7);
+                        camera.rotation.set(0, 0, 0);
+                        
+                        document.getElementById('nextBtn').style.display = 'block';
+                    }
                 });
+            }, 4000);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            const video2 = document.getElementById('parkVideo');
+            const videoTex2 = new THREE.VideoTexture(video2);
+            leftPage.material.map = videoTex2;
+            leftPage.material.needsUpdate = true;
+            video2.play();
+
+            currentRoute = route2;
+            routeLine.geometry.setFromPoints(currentRoute.getPoints(50));
+            fraction = 0; 
+        });
+
+        // --- ANIMATION LOOP ---
+        let fraction = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (bookGroup.visible) {
+                bookGroup.rotation.y = Math.sin(Date.now() * 0.001) * 0.05;
+
+                fraction += 0.004;
+                if (fraction > 1) fraction = 0;
+                
+                const point = currentRoute.getPoint(fraction);
+                car.position.copy(point);
+                car.lookAt(currentRoute.getPoint(Math.min(fraction + 0.01, 1)));
             }
-        }, 100);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function createMapCanvas() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 700;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#eaf6ff';
+            ctx.fillRect(0,0,512,700);
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText("Gaborone Map", 120, 100);
+            ctx.font = '30px Arial';
+            ctx.fillText("10996 Rametsane", 50, 600);
+            ctx.fillText("59866 Shorobe St", 200, 100);
+            return canvas;
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
