@@ -3,705 +3,695 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Valentine's Journey · Gaborone</title>
+    <title>Our Journey - Interactive Experience</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Georgia', 'Times New Roman', serif; }
-        #instruction {
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            overflow: hidden;
+            background: #0a0a0a;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.15s ease, background 0.2s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor.active {
+            transform: scale(1.5);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Scene Container */
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            perspective: 1500px;
+            transition: all 1.5s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        /* Living Room Scene */
+        .living-room {
+            width: 100%;
+            height: 100%;
             position: absolute;
-            bottom: 30px;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #1a1410 0%, #2d2520 50%, #1a1410 100%);
+            opacity: 1;
+            transition: opacity 1.5s ease;
+        }
+
+        .living-room::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 30% 40%, rgba(255, 200, 150, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(150, 100, 80, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to bottom, 
+                rgba(60, 40, 30, 0) 0%,
+                rgba(40, 30, 25, 0.5) 50%,
+                rgba(30, 20, 15, 0.8) 100%);
+            transform: rotateX(60deg);
+            transform-origin: bottom;
+        }
+
+        /* TV Stand & TV */
+        .tv-stand {
+            position: absolute;
+            bottom: 25%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            color: #b3002d;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 2px solid gold;
-            z-index: 20;
+            width: 600px;
+            height: 80px;
+            background: linear-gradient(to bottom, #3a2a20, #2a1a10);
+            border-radius: 10px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .tv-container {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 2s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .scene.zooming .tv-container {
+            transform: translateX(-50%) scale(5);
+            opacity: 0;
+        }
+
+        .tv {
+            width: 500px;
+            height: 300px;
+            background: #000;
+            border: 15px solid #1a1a1a;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
             cursor: pointer;
-            transition: 0.2s;
-            pointer-events: auto;
         }
-        #instruction:hover {
-            background: white;
-            transform: translateX(-50%) scale(1.05);
-            border-color: #ff4d6d;
-        }
-        #page-flip-hint {
+
+        .tv::before {
+            content: '';
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.6);
-            color: gold;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            z-index: 25;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.3) 100%);
             pointer-events: none;
-            backdrop-filter: blur(4px);
-            border: 1px solid #ffb3c6;
+            border-radius: 4px;
         }
-        .note {
+
+        .tv-screen {
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .play-button {
             position: absolute;
-            top: 10px;
-            right: 20px;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            z-index: 15;
-            text-shadow: 1px 1px 2px black;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .play-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .play-button::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 25px solid #000;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            margin-left: 5px;
+        }
+
+        .play-button.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        video.playing {
+            opacity: 1;
+        }
+
+        /* Book Scene */
+        .book-scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4bf 100%);
+            perspective: 2000px;
+        }
+
+        .book-scene.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .book {
+            width: 800px;
+            height: 600px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 2s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .book.closed {
+            transform: rotateY(0deg);
+        }
+
+        .book.opening {
+            transform: rotateY(-20deg);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            border-radius: 10px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                inset 0 0 30px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+            transition: transform 2s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .book.opening .book-cover {
+            transform: rotateY(-170deg);
+            transform-origin: left;
+        }
+
+        .book-cover::before {
+            content: 'Our Journey';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #f5e6d3;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 4px;
+        }
+
+        .book-pages {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: #faf8f3;
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            opacity: 0;
+            transition: opacity 1s ease 2s;
+            box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .book.opening .book-pages {
+            opacity: 1;
+        }
+
+        .page-left, .page-right {
+            flex: 1;
+            padding: 60px;
+            position: relative;
+        }
+
+        .page-left {
+            border-right: 2px solid rgba(139, 69, 19, 0.1);
+        }
+
+        .photo-frame {
+            width: 100%;
+            height: 350px;
+            background: #fff;
+            border: 15px solid #8b4513;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: #8b4513;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .location-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: #654321;
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* 3D Map Route */
+        .map-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            perspective: 1200px;
+            margin-top: 20px;
+        }
+
+        .map-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            background: linear-gradient(to bottom, #a8d5e2 0%, #c9e4ca 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .route-path {
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 80%;
+            height: 60%;
+        }
+
+        .route-line {
+            stroke: #8b4513;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawRoute 4s ease-in-out 3s forwards;
+        }
+
+        @keyframes drawRoute {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .location-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #d32f2f;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .location-marker::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .marker-start {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .marker-end {
+            top: 70%;
+            left: 75%;
+            animation-delay: 3s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: rotate(-45deg) scale(1);
+            }
+            50% {
+                transform: rotate(-45deg) scale(1.2);
+            }
+        }
+
+        .car {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: #2196f3;
+            border-radius: 5px;
+            top: 20%;
+            left: 10%;
+            transform-origin: center;
+            opacity: 0;
+            animation: moveCar 5s ease-in-out 3s forwards;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .car::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 10px;
+            width: 20px;
+            height: 15px;
+            background: #1976d2;
+            border-radius: 3px 3px 0 0;
+        }
+
+        @keyframes moveCar {
+            0% {
+                top: 20%;
+                left: 10%;
+                opacity: 1;
+                transform: rotate(0deg);
+            }
+            30% {
+                top: 35%;
+                left: 35%;
+                transform: rotate(25deg);
+            }
+            60% {
+                top: 55%;
+                left: 58%;
+                transform: rotate(10deg);
+            }
+            100% {
+                top: 70%;
+                left: 75%;
+                opacity: 1;
+                transform: rotate(0deg);
+            }
+        }
+
+        .location-label {
+            position: absolute;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #654321;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .label-start {
+            top: 10%;
+            left: 10%;
+        }
+
+        .label-end {
+            top: 75%;
+            left: 60%;
+        }
+
+        /* Ambient particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="instruction">❤️ Begin Our Valentine's Story ❤️</div>
-    <div id="page-flip-hint">📖 Click the book to turn pages</div>
-    <div class="note">10996 Rametsane → 59866 Shorobe St, Block 7 · Gaborone</div>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
 
-    <!-- Import Three.js and add-ons -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main Scene -->
+    <div class="scene" id="scene">
+        <!-- Living Room -->
+        <div class="living-room" id="livingRoom">
+            <div class="floor"></div>
+            
+            <div class="tv-container" id="tvContainer">
+                <div class="tv" id="tv">
+                    <div class="tv-screen">
+                        <div class="play-button" id="playButton"></div>
+                        <video id="video" src="">
+                            <!-- Replace with your video URL -->
+                            <!-- <source src="your-video.mp4" type="video/mp4"> -->
+                        </video>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tv-stand"></div>
+        </div>
+
+        <!-- Book Scene -->
+        <div class="book-scene" id="bookScene">
+            <div class="book closed" id="book">
+                <div class="book-cover"></div>
+                <div class="book-pages">
+                    <div class="page-left">
+                        <div class="photo-frame">
+                            <!-- Add your couple photo here -->
+                            <img src="" alt="Us" id="couplePhoto">
+                            <!-- If no image, placeholder text shows -->
+                            <span id="photoPlaceholder">Your Photo Here</span>
+                        </div>
+                        <div class="location-text">Gaborone to Shorobe</div>
+                    </div>
+                    <div class="page-right">
+                        <div class="map-container">
+                            <div class="map-3d">
+                                <svg class="route-path" viewBox="0 0 400 300">
+                                    <path class="route-line" d="M 40 60 Q 150 100 220 180 T 300 240" />
+                                </svg>
+                                
+                                <div class="location-marker marker-start"></div>
+                                <div class="location-marker marker-end"></div>
+                                <div class="car"></div>
+                                
+                                <div class="location-label label-start">
+                                    Gaborone<br>
+                                    <small>10996 Rametsane</small>
+                                </div>
+                                <div class="location-label label-end">
+                                    Shorobe<br>
+                                    <small>59866 Shorobe St</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Cursor interactions
+        document.querySelectorAll('button, .play-button, .tv').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+        });
+
+        // Create particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
         }
-    </script>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+        // Main interaction logic
+        const playButton = document.getElementById('playButton');
+        const video = document.getElementById('video');
+        const scene = document.getElementById('scene');
+        const livingRoom = document.getElementById('livingRoom');
+        const bookScene = document.getElementById('bookScene');
+        const book = document.getElementById('book');
+        const couplePhoto = document.getElementById('couplePhoto');
+        const photoPlaceholder = document.getElementById('photoPlaceholder');
 
-        // --- Setup scene, camera, renderers ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a1a); // deep night blue
-
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(-2, 2, 6); // start near entrance
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
-
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0px';
-        labelRenderer.domElement.style.left = '0px';
-        labelRenderer.domElement.style.pointerEvents = 'none';
-        document.body.appendChild(labelRenderer.domElement);
-
-        // --- Controls (will be enabled only when user can explore) ---
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enableZoom = true;
-        controls.maxPolarAngle = Math.PI / 2;
-        controls.target.set(0, 1.2, 0);
-        controls.enabled = false; // initially disabled during story
-
-        // --- Lighting (romantic warm) ---
-        const ambient = new THREE.AmbientLight(0x40406b);
-        scene.add(ambient);
-
-        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
-        mainLight.position.set(2, 5, 4);
-        mainLight.castShadow = true;
-        mainLight.receiveShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        const d = 5;
-        mainLight.shadow.camera.left = -d;
-        mainLight.shadow.camera.right = d;
-        mainLight.shadow.camera.top = d;
-        mainLight.shadow.camera.bottom = -d;
-        scene.add(mainLight);
-
-        const fillLight = new THREE.PointLight(0x4466aa, 0.5);
-        fillLight.position.set(-2, 1, 3);
-        scene.add(fillLight);
-
-        const lampLight = new THREE.PointLight(0xffaa66, 0.8, 7);
-        lampLight.position.set(1.8, 2.5, 1.2);
-        scene.add(lampLight);
-
-        // --- Build the sitting room (cozy, without address labels) ---
-        const roomGroup = new THREE.Group();
-
-        // Floor
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a3c31, roughness: 0.7 });
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = 0;
-        floor.receiveShadow = true;
-        roomGroup.add(floor);
-
-        // Walls
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0x8a7a6a, roughness: 0.6 });
-        const backWall = new THREE.Mesh(new THREE.BoxGeometry(8, 4, 0.3), wallMat);
-        backWall.position.set(0, 2, -2.85);
-        backWall.receiveShadow = true;
-        backWall.castShadow = true;
-        roomGroup.add(backWall);
-
-        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 6), wallMat);
-        leftWall.position.set(-3.85, 2, 0);
-        leftWall.receiveShadow = true;
-        leftWall.castShadow = true;
-        roomGroup.add(leftWall);
-
-        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 6), wallMat);
-        rightWall.position.set(3.85, 2, 0);
-        rightWall.receiveShadow = true;
-        rightWall.castShadow = true;
-        roomGroup.add(rightWall);
-
-        const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.8 });
-        const ceiling = new THREE.Mesh(new THREE.BoxGeometry(8, 0.2, 6), ceilingMat);
-        ceiling.position.set(0, 4, 0);
-        ceiling.receiveShadow = true;
-        ceiling.castShadow = true;
-        roomGroup.add(ceiling);
-
-        // Couch
-        const couchMat = new THREE.MeshStandardMaterial({ color: 0x6a4e3a, roughness: 0.8 });
-        const couchBase = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 1.2), couchMat);
-        couchBase.position.set(-1.2, 0.25, 1.5);
-        couchBase.castShadow = true;
-        couchBase.receiveShadow = true;
-        roomGroup.add(couchBase);
-        const couchBack = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 0.4), couchMat);
-        couchBack.position.set(-1.2, 0.9, 2.0);
-        couchBack.castShadow = true;
-        couchBack.receiveShadow = true;
-        roomGroup.add(couchBack);
-        const armLeft = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.2), couchMat);
-        armLeft.position.set(-2.4, 0.65, 1.5);
-        armLeft.castShadow = true;
-        armLeft.receiveShadow = true;
-        roomGroup.add(armLeft);
-        const armRight = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.2), couchMat);
-        armRight.position.set(0.0, 0.65, 1.5);
-        armRight.castShadow = true;
-        armRight.receiveShadow = true;
-        roomGroup.add(armRight);
-
-        // Coffee table with remote
-        const tableMat = new THREE.MeshStandardMaterial({ color: 0xaa9977, roughness: 0.4 });
-        const tableTop = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 1.2), tableMat);
-        tableTop.position.set(0.5, 0.55, -0.2);
-        tableTop.castShadow = true;
-        tableTop.receiveShadow = true;
-        roomGroup.add(tableTop);
+        // Set your video URL here
+        const VIDEO_URL = 'your-video-url.mp4'; // Replace with actual video URL
         
-        // Remote control (small box with a red button)
-        const remoteMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3 });
-        const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 0.15), remoteMat);
-        remoteBody.position.set(0.5, 0.65, -0.2); // on table
-        remoteBody.castShadow = true;
-        remoteBody.receiveShadow = true;
-        roomGroup.add(remoteBody);
-        const buttonMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
-        const button = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.02), buttonMat);
-        button.rotation.x = 0;
-        button.position.set(0.5, 0.71, -0.18);
-        button.castShadow = true;
-        roomGroup.add(button);
+        // Set your photo URL here
+        const PHOTO_URL = 'your-photo-url.jpg'; // Replace with actual photo URL
 
-        // TV unit
-        const tvUnitMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7 });
-        const tvCabinet = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.8, 0.8), tvUnitMat);
-        tvCabinet.position.set(0, 0.4, -2.2);
-        tvCabinet.castShadow = true;
-        tvCabinet.receiveShadow = true;
-        roomGroup.add(tvCabinet);
-
-        // TV
-        const tvBody = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.3, 0.1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-        tvBody.position.set(0, 1.2, -2.0);
-        tvBody.castShadow = true;
-        tvBody.receiveShadow = true;
-        roomGroup.add(tvBody);
-
-        // Screen (will use video texture)
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 360;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#1a1a2e';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 40px Arial';
-        ctx.fillStyle = 'gold';
-        ctx.textAlign = 'center';
-        ctx.fillText('❤️', canvas.width/2, canvas.height/2);
-        const videoTexture = new THREE.CanvasTexture(canvas);
-        const screenMat = new THREE.MeshStandardMaterial({ map: videoTexture, emissive: 0x222222 });
-        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.2), screenMat);
-        screen.position.set(0, 1.2, -1.92);
-        roomGroup.add(screen);
-
-        scene.add(roomGroup);
-
-        // --- Simple humanoid character (will walk to couch) ---
-        const characterGroup = new THREE.Group();
-        // Body
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3355aa });
-        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.8), bodyMat);
-        torso.position.y = 0.4;
-        torso.castShadow = true;
-        torso.receiveShadow = true;
-        characterGroup.add(torso);
-        // Head
-        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2), headMat);
-        head.position.y = 0.9;
-        head.castShadow = true;
-        head.receiveShadow = true;
-        characterGroup.add(head);
-        // Legs
-        const legMat = new THREE.MeshStandardMaterial({ color: 0x224488 });
-        const legLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4), legMat);
-        legLeft.position.set(-0.15, 0.2, 0);
-        legLeft.castShadow = true;
-        legLeft.receiveShadow = true;
-        characterGroup.add(legLeft);
-        const legRight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4), legMat);
-        legRight.position.set(0.15, 0.2, 0);
-        legRight.castShadow = true;
-        legRight.receiveShadow = true;
-        characterGroup.add(legRight);
-        // Arms
-        const armMat = new THREE.MeshStandardMaterial({ color: 0x3355aa });
-        const armLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5), armMat);
-        armLeft.position.set(-0.3, 0.6, 0);
-        armLeft.rotation.z = 0.2;
-        armLeft.castShadow = true;
-        armLeft.receiveShadow = true;
-        characterGroup.add(armLeft);
-        const armRight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5), armMat);
-        armRight.position.set(0.3, 0.6, 0);
-        armRight.rotation.z = -0.2;
-        armRight.castShadow = true;
-        armRight.receiveShadow = true;
-        characterGroup.add(armRight);
-
-        characterGroup.position.set(-3, 0, 2.5); // start near entrance
-        characterGroup.rotation.y = 0.5;
-        scene.add(characterGroup);
-
-        // --- Map scene (hidden initially) ---
-        const mapGroup = new THREE.Group();
-        mapGroup.visible = false;
-
-        // Ground plane with subtle map texture
-        const mapPlaneMat = new THREE.MeshStandardMaterial({ color: 0xc0b0a0, roughness: 0.7 });
-        const mapPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), mapPlaneMat);
-        mapPlane.rotation.x = -Math.PI / 2;
-        mapPlane.position.y = -0.01;
-        mapPlane.receiveShadow = true;
-        mapGroup.add(mapPlane);
-
-        // Grid to simulate city blocks
-        const gridHelper = new THREE.GridHelper(20, 40, 0x8b5a2b, 0x5a3a1a);
-        gridHelper.rotation.x = -Math.PI / 2;
-        gridHelper.position.y = 0;
-        mapGroup.add(gridHelper);
-
-        // Random low buildings
-        const buildingMat = new THREE.MeshStandardMaterial({ color: 0xa52a2a });
-        for (let i = 0; i < 60; i++) {
-            const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, Math.random()*0.5+0.1, 0.2), buildingMat);
-            b.position.set((Math.random()-0.5)*15, 0.05, (Math.random()-0.5)*15);
-            b.castShadow = true;
-            b.receiveShadow = true;
-            mapGroup.add(b);
+        // Load media
+        if (VIDEO_URL && VIDEO_URL !== 'your-video-url.mp4') {
+            video.src = VIDEO_URL;
         }
-
-        // Start and end markers
-        const startPos = new THREE.Vector3(-6, 0.1, -4);  // approx 10996 Rametsane
-        const endPos = new THREE.Vector3(7, 0.1, 5);     // approx 59866 Shorobe St, Block 7
-
-        const startMarker = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0x442200 }));
-        startMarker.position.copy(startPos);
-        mapGroup.add(startMarker);
-
-        const endMarker = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({ color: 0xff4d6d, emissive: 0x330000 }));
-        endMarker.position.copy(endPos);
-        mapGroup.add(endMarker);
-
-        // Car (red)
-        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0xff3333 }));
-        car.castShadow = true;
-        car.receiveShadow = true;
-        mapGroup.add(car);
-
-        // Path curve (simulating GPS route)
-        const points = [
-            startPos.clone(),
-            new THREE.Vector3(-3, 0.1, -1),
-            new THREE.Vector3(0, 0.1, 1),
-            new THREE.Vector3(3, 0.1, 3),
-            endPos.clone()
-        ];
-        const curve = new THREE.CatmullRomCurve3(points);
         
-        // Visualize path (dashed line)
-        const linePoints = curve.getPoints(100);
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-        const lineMat = new THREE.LineDashedMaterial({ color: 0xffaa00, dashSize: 0.2, gapSize: 0.1 });
-        const pathLine = new THREE.Line(lineGeo, lineMat);
-        pathLine.computeLineDistances();
-        mapGroup.add(pathLine);
-
-        // Address labels (CSS2D)
-        const startDiv = document.createElement('div');
-        startDiv.textContent = '10996 Rametsane';
-        startDiv.style.color = 'gold';
-        startDiv.style.fontSize = '18px';
-        startDiv.style.fontWeight = 'bold';
-        startDiv.style.textShadow = '1px 1px 3px black';
-        const startLabel = new CSS2DObject(startDiv);
-        startLabel.position.copy(startPos.clone().add(new THREE.Vector3(0, 0.5, 0)));
-        mapGroup.add(startLabel);
-
-        const endDiv = document.createElement('div');
-        endDiv.textContent = '59866 Shorobe St, Block 7';
-        endDiv.style.color = '#ffb3c6';
-        endDiv.style.fontSize = '18px';
-        endDiv.style.fontWeight = 'bold';
-        endDiv.style.textShadow = '1px 1px 3px black';
-        const endLabel = new CSS2DObject(endDiv);
-        endLabel.position.copy(endPos.clone().add(new THREE.Vector3(0, 0.5, 0)));
-        mapGroup.add(endLabel);
-
-        scene.add(mapGroup);
-
-        // --- Book (10 pages, interactive) ---
-        const bookGroup = new THREE.Group();
-        bookGroup.visible = false;
-
-        // Book cover (two halves)
-        const coverMat = new THREE.MeshStandardMaterial({ color: 0x8b1e3f, roughness: 0.3, emissive: 0x220000 });
-        const coverLeft = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 2.4), coverMat);
-        coverLeft.position.set(-0.9, 0, 0);
-        coverLeft.castShadow = true;
-        coverLeft.receiveShadow = true;
-        bookGroup.add(coverLeft);
-
-        const coverRight = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 2.4), coverMat);
-        coverRight.position.set(0.9, 0, 0);
-        coverRight.castShadow = true;
-        coverRight.receiveShadow = true;
-        bookGroup.add(coverRight);
-
-        // Spine
-        const spineMat = new THREE.MeshStandardMaterial({ color: 0x5a0e2a });
-        const spine = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 2.4), spineMat);
-        spine.position.set(0, 0, 0);
-        spine.castShadow = true;
-        spine.receiveShadow = true;
-        bookGroup.add(spine);
-
-        // Pages (10 pages = 5 leaves, each two sides)
-        const pageMat = new THREE.MeshStandardMaterial({ color: 0xfff5e6 });
-        const pages = []; // store for interaction
-
-        // We'll create 5 double-sided leaves (each leaf has two pages: left and right side)
-        // For simplicity, we'll create 10 separate planes arranged in order.
-        const pageWidth = 1.7;
-        const pageHeight = 2.3;
-        const pageDepth = 0.02;
-
-        for (let i = 0; i < 10; i++) {
-            // Decide texture based on page number
-            const pageCanvas = document.createElement('canvas');
-            pageCanvas.width = 512;
-            pageCanvas.height = 512;
-            const pCtx = pageCanvas.getContext('2d');
-            pCtx.fillStyle = '#fff9f0';
-            pCtx.fillRect(0, 0, 512, 512);
-            
-            // Romantic elements
-            pCtx.strokeStyle = '#e31b23';
-            pCtx.lineWidth = 8;
-            pCtx.strokeRect(20, 20, 472, 472);
-            
-            pCtx.font = 'italic 40px "Georgia"';
-            pCtx.fillStyle = '#b3002d';
-            pCtx.textAlign = 'center';
-            
-            if (i === 0) {
-                pCtx.fillText('Our Love Story', 256, 120);
-                pCtx.font = '30px "Georgia"';
-                pCtx.fillText(' Valentine 2026', 256, 400);
-                // draw hearts
-                for (let h=0; h<5; h++) {
-                    pCtx.fillStyle = '#ff4d6d';
-                    pCtx.beginPath();
-                    pCtx.moveTo(150 + h*80, 250);
-                    pCtx.bezierCurveTo(130 + h*80, 200, 80 + h*80, 220, 150 + h*80, 300);
-                    pCtx.bezierCurveTo(220 + h*80, 220, 170 + h*80, 200, 150 + h*80, 250);
-                    pCtx.fill();
-                }
-            } else if (i === 9) {
-                pCtx.fillText('Forever Yours', 256, 256);
-                pCtx.font = '25px "Georgia"';
-                pCtx.fillText('❤️ Gaborone ❤️', 256, 350);
-            } else {
-                pCtx.fillText(`Page ${i+1}`, 256, 200);
-                pCtx.fillText('✨', 256, 300);
-                pCtx.fillText('I love you', 256, 400);
-            }
-            
-            const pageTexture = new THREE.CanvasTexture(pageCanvas);
-            const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(pageWidth, pageDepth, pageHeight), 
-                new THREE.MeshStandardMaterial({ map: pageTexture }));
-            
-            // Position pages in a stack, slightly offset
-            pageMesh.position.set(0, 0.1 + i * 0.03, 0);
-            pageMesh.castShadow = true;
-            pageMesh.receiveShadow = true;
-            pageMesh.userData = { pageIndex: i };
-            bookGroup.add(pageMesh);
-            pages.push(pageMesh);
+        if (PHOTO_URL && PHOTO_URL !== 'your-photo-url.jpg') {
+            couplePhoto.src = PHOTO_URL;
+            photoPlaceholder.style.display = 'none';
         }
 
-        // Position the book nicely
-        bookGroup.position.set(0, 1.0, 2);
-        bookGroup.rotation.y = 0.3;
-        scene.add(bookGroup);
+        playButton.addEventListener('click', () => {
+            playButton.classList.add('hidden');
+            video.classList.add('playing');
+            video.play();
+        });
 
-        // --- State management ---
-        let state = 'intro'; // intro, walking, sitting, tvPlaying, zooming, map, book
-        let actionIndex = 0;
-        const actions = [
-            { type: 'walk', targetPos: new THREE.Vector3(-1.2, 0, 1.5), duration: 3.0 }, // walk to couch
-            { type: 'sit', duration: 1.0 },
-            { type: 'pickRemote', duration: 1.0 },
-            { type: 'tvOn', duration: 0.5 }
-        ];
-        let actionStartTime = 0;
-        let actionProgress = 0;
+        // When video ends, zoom in and transition to book
+        video.addEventListener('ended', () => {
+            // Zoom into TV
+            scene.classList.add('zooming');
+            
+            // After zoom, hide living room and show book
+            setTimeout(() => {
+                livingRoom.style.opacity = '0';
+                bookScene.classList.add('active');
+                
+                // Open book after a brief moment
+                setTimeout(() => {
+                    book.classList.remove('closed');
+                    book.classList.add('opening');
+                }, 500);
+            }, 1500);
+        });
 
-        let videoPlaying = false;
-        let videoStartTime = 0;
-
-        let carProgress = 0;
-        const carSpeed = 0.15; // per second
-
-        let currentPage = 0;
-        let bookInteractive = false;
-
-        // Helper to advance story
-        function startNextAction() {
-            if (actionIndex < actions.length) {
-                actionStartTime = performance.now() / 1000;
-                actionProgress = 0;
-            } else {
-                // All intro actions done, now TV video starts
-                state = 'tvPlaying';
-                videoPlaying = true;
-                videoStartTime = performance.now() / 1000;
-                // Turn on TV (flicker effect)
-                flickerTV();
-            }
-        }
-
-        function flickerTV() {
-            // Simple flicker: change canvas content rapidly for a few frames
-            let flickerCount = 0;
-            const interval = setInterval(() => {
-                ctx.fillStyle = flickerCount % 2 === 0 ? '#ffffff' : '#1a1a2e';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                videoTexture.needsUpdate = true;
-                flickerCount++;
-                if (flickerCount > 10) {
-                    clearInterval(interval);
-                    // start video simulation
-                }
-            }, 50);
-        }
-
-        // Click listener
-        document.getElementById('instruction').addEventListener('click', () => {
-            if (state === 'intro') {
-                state = 'walking';
-                document.getElementById('instruction').style.opacity = '0.5';
-                document.getElementById('instruction').style.pointerEvents = 'none';
-                startNextAction();
-            } else if (state === 'book' && bookInteractive) {
-                // Flip to next page
-                currentPage = (currentPage + 1) % pages.length;
-                // Bring that page to front (visually, we can just rotate the book group or highlight)
-                // For simplicity, we'll rotate the whole book to next page? Better to animate page turning.
-                // Here we'll just make the current page slightly more prominent (move forward)
-                pages.forEach((p, idx) => {
-                    if (idx === currentPage) {
-                        p.position.z = 0.1;
-                    } else {
-                        p.position.z = 0;
-                    }
+        // For testing without video - click TV after 3 seconds
+        setTimeout(() => {
+            if (!video.src || video.src.includes('your-video')) {
+                playButton.addEventListener('click', () => {
+                    playButton.classList.add('hidden');
+                    
+                    // Simulate video ending after 3 seconds
+                    setTimeout(() => {
+                        scene.classList.add('zooming');
+                        
+                        setTimeout(() => {
+                            livingRoom.style.opacity = '0';
+                            bookScene.classList.add('active');
+                            
+                            setTimeout(() => {
+                                book.classList.remove('closed');
+                                book.classList.add('opening');
+                            }, 500);
+                        }, 1500);
+                    }, 3000);
                 });
             }
-        });
-
-        // Update video frames
-        function updateVideoTexture(time) {
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // Draw romantic animation
-            const t = time * 0.8;
-            ctx.fillStyle = 'gold';
-            ctx.beginPath();
-            ctx.arc(200 + Math.sin(t)*40, 150 + Math.cos(t*1.2)*30, 25, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#e31b23';
-            ctx.beginPath();
-            ctx.arc(400 + Math.cos(t*0.9)*35, 200 + Math.sin(t*1.1)*35, 25, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.font = 'bold 50px "Georgia"';
-            ctx.fillStyle = 'white';
-            ctx.fillText('You & Me', 200, 300);
-            ctx.font = '30px Arial';
-            ctx.fillStyle = '#ffb3c6';
-            ctx.fillText(' Valentine', 280, 350);
-            videoTexture.needsUpdate = true;
-        }
-
-        // --- Animation loop ---
-        const clock = new THREE.Clock();
-
-        function animate() {
-            const delta = clock.getDelta();
-            const elapsed = performance.now() / 1000;
-
-            // State handling
-            if (state === 'walking') {
-                // Move character and camera
-                if (actionIndex === 0) { // walk
-                    actionProgress += delta / actions[0].duration;
-                    if (actionProgress >= 1) {
-                        actionProgress = 1;
-                        actionIndex++;
-                        startNextAction();
-                    }
-                    // Lerp character position
-                    const startPosChar = new THREE.Vector3(-3, 0, 2.5);
-                    const endPosChar = new THREE.Vector3(-1.2, 0, 1.5);
-                    characterGroup.position.lerpVectors(startPosChar, endPosChar, actionProgress);
-                    // Camera follows
-                    camera.position.lerpVectors(new THREE.Vector3(-2, 2, 6), new THREE.Vector3(-1, 1.6, 3), actionProgress);
-                    camera.lookAt(characterGroup.position.clone().add(new THREE.Vector3(0, 1, 0)));
-                } else if (actionIndex === 1) { // sit (lower character)
-                    actionProgress += delta / actions[1].duration;
-                    if (actionProgress >= 1) {
-                        actionProgress = 1;
-                        actionIndex++;
-                        startNextAction();
-                    }
-                    // Scale down character to sitting height
-                    characterGroup.scale.y = 1 - actionProgress * 0.5;
-                    characterGroup.position.y = -0.2 * actionProgress; // sink into couch
-                } else if (actionIndex === 2) { // pick remote
-                    actionProgress += delta / actions[2].duration;
-                    if (actionProgress >= 1) {
-                        actionProgress = 1;
-                        actionIndex++;
-                        startNextAction();
-                    }
-                    // Move remote towards character's hand
-                    const remote = roomGroup.children.find(c => c.material && c.material.color.getHex() === 0x222222);
-                    if (remote) {
-                        remote.position.lerpVectors(new THREE.Vector3(0.5, 0.65, -0.2), new THREE.Vector3(-1.0, 1.2, 1.8), actionProgress);
-                    }
-                } else if (actionIndex === 3) { // tv on
-                    actionProgress += delta / actions[3].duration;
-                    if (actionProgress >= 1) {
-                        actionIndex++; // will trigger tvPlaying in startNextAction
-                        startNextAction();
-                    }
-                }
-            } else if (state === 'tvPlaying') {
-                if (videoPlaying) {
-                    updateVideoTexture(elapsed - videoStartTime);
-                    // After 5 seconds, start zoom
-                    if (elapsed - videoStartTime > 5.0) {
-                        state = 'zooming';
-                        zoomStartTime = elapsed;
-                    }
-                }
-            } else if (state === 'zooming') {
-                const zoomDur = 2.0;
-                const zProgress = (elapsed - zoomStartTime) / zoomDur;
-                if (zProgress >= 1) {
-                    // Switch to map
-                    roomGroup.visible = false;
-                    characterGroup.visible = false;
-                    mapGroup.visible = true;
-                    bookGroup.visible = false; // will appear later
-                    camera.position.set(0, 5, 15);
-                    controls.target.set(0, 0, 0);
-                    controls.enabled = true;
-                    state = 'map';
-                    carProgress = 0;
-                } else {
-                    // Zoom into TV
-                    const startCam = new THREE.Vector3(-1, 1.6, 3);
-                    const endCam = new THREE.Vector3(0, 1.2, -1.5);
-                    camera.position.lerpVectors(startCam, endCam, zProgress);
-                    controls.target.lerpVectors(new THREE.Vector3(-1, 1.2, 1), new THREE.Vector3(0, 1.2, -2), zProgress);
-                }
-            } else if (state === 'map') {
-                // Move car along curve
-                carProgress += delta * carSpeed;
-                if (carProgress >= 1) {
-                    carProgress = 1;
-                    // Car arrived, show book
-                    if (!bookGroup.visible) {
-                        bookGroup.visible = true;
-                        bookInteractive = true;
-                        state = 'book';
-                        // Position book nicely
-                        bookGroup.position.set(0, 1.5, 2);
-                        camera.position.set(0, 2, 5);
-                        controls.target.set(0, 1.5, 2);
-                    }
-                }
-                const point = curve.getPoint(carProgress);
-                car.position.copy(point);
-                // Orient car along path
-                const tangent = curve.getTangent(carProgress);
-                car.rotation.y = Math.atan2(tangent.x, tangent.z);
-            } else if (state === 'book') {
-                // Allow page turning via click (already handled)
-            }
-
-            // Update controls if enabled
-            if (controls.enabled) controls.update();
-
-            // Render
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-
-            requestAnimationFrame(animate);
-        }
-
-        animate();
-
-        // --- Resize ---
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
+        }, 100);
     </script>
 </body>
 </html>
