@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Our Story</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>For Jess</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
+        canvas { display: block; }
+        
+        /* Style for the Turn Page Button */
+        #nextPageBtn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+            transition: 0.3s;
+        }
+        #nextPageBtn:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
+    <video id="parkVideo" src="1001189975.mp4" loop playsinline style="display:none;"></video>
 
-  <div class="book-container">
-    <div class="page left-page">
-      <div class="photo-frame">
-        <img src="1001191122.jpg" alt="When we first met"> 
-      </div>
-      <h2 class="caption">Where it all began ❤️</h2>
-    </div>
+    <button id="nextPageBtn">Next Chapter ➔</button>
 
-    <div class="page right-page">
-      <h3 class="route-title">The Journey to You</h3>
-      <div class="map-area">
-        <svg viewBox="0 0 500 500" class="svg-map">
-          <path id="drive-route" d="M 50 400 Q 250 350, 300 200 T 450 50" fill="transparent" stroke="#ff4d4d" stroke-width="5" stroke-dasharray="10,10" />
-          
-          <text x="30" y="430" fill="#333" font-weight="bold">10996 Rametsane</text>
-          <text x="350" y="40" fill="#333" font-weight="bold">59866 Shorobe St</text>
-
-          <rect id="car" width="20" height="10" fill="#222" rx="3" />
-        </svg>
-      </div>
-    </div>
-  </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
