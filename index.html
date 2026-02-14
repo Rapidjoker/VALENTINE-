@@ -48,6 +48,8 @@
     </script>
 </head>
 <body>
+    
+    <video id="tvVideo" src="our-video.mp4" playsinline style="display:none;"></video>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
@@ -174,6 +176,9 @@
         flickerCtx.fillStyle = '#111111';
         flickerCtx.fillRect(0, 0, 512, 256);
 
+        const videoEl = document.getElementById('tvVideo');
+        const videoTexture = new THREE.VideoTexture(videoEl);
+
         const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), new THREE.MeshBasicMaterial({ map: flickerTexture }));
         tvScreen.position.set(0, 2.75, -4.74); 
         roomGroup.add(tvScreen);
@@ -235,11 +240,10 @@
         mapGroup.add(car);
 
         // --- SCENE 3: THE HEART PARTICLE RAIN ---
-        // 1. Generate a perfect white heart texture on a hidden canvas
         const heartCanvas = document.createElement('canvas');
         heartCanvas.width = 64; heartCanvas.height = 64;
         const hCtx = heartCanvas.getContext('2d');
-        hCtx.fillStyle = '#ffffff'; // White allows us to tint it later
+        hCtx.fillStyle = '#ffffff'; 
         hCtx.beginPath();
         hCtx.moveTo(32, 15);
         hCtx.bezierCurveTo(32, 12, 25, 0, 15, 0);
@@ -251,42 +255,30 @@
         hCtx.fill();
         const heartTexture = new THREE.CanvasTexture(heartCanvas);
 
-        // 2. Build the particle system
         const particleCount = 200;
         const particlesGeo = new THREE.BufferGeometry();
         const posArray = new Float32Array(particleCount * 3);
         const colArray = new Float32Array(particleCount * 3);
-        
-        // A mix of vibrant pinks and deep reds
         const colorsOfLove = [new THREE.Color(0xff4d4d), new THREE.Color(0xffb3b3), new THREE.Color(0xff1a1a), new THREE.Color(0xffccd5)];
 
         for(let i=0; i < particleCount; i++) {
-            // Random scatter
-            posArray[i*3] = (Math.random() - 0.5) * 20; // x
-            posArray[i*3+1] = Math.random() * 20 - 5;   // y
-            posArray[i*3+2] = (Math.random() - 0.5) * 10 - 2; // z
+            posArray[i*3] = (Math.random() - 0.5) * 20; 
+            posArray[i*3+1] = Math.random() * 20 - 5;   
+            posArray[i*3+2] = (Math.random() - 0.5) * 10 - 2; 
             
-            // Assign random love color
             const c = colorsOfLove[Math.floor(Math.random() * colorsOfLove.length)];
-            colArray[i*3] = c.r; 
-            colArray[i*3+1] = c.g; 
-            colArray[i*3+2] = c.b;
+            colArray[i*3] = c.r; colArray[i*3+1] = c.g; colArray[i*3+2] = c.b;
         }
 
         particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
         particlesGeo.setAttribute('color', new THREE.BufferAttribute(colArray, 3));
 
         const particleMat = new THREE.PointsMaterial({
-            size: 0.8,
-            map: heartTexture,
-            transparent: true,
-            opacity: 0.8,
-            vertexColors: true, // This applies our custom red/pink tints
-            depthWrite: false
+            size: 0.8, map: heartTexture, transparent: true, opacity: 0.8, vertexColors: true, depthWrite: false
         });
 
         const heartParticles = new THREE.Points(particlesGeo, particleMat);
-        heartParticles.visible = false; // Hide until book scene
+        heartParticles.visible = false; 
         scene.add(heartParticles);
 
         // --- SCENE 4: THE REALISTIC 10-PAGE BOOK ---
@@ -428,16 +420,21 @@
                     if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         
-                        flickerCtx.fillStyle = '#111111';
-                        flickerCtx.fillRect(0,0,512,256);
-                        flickerCtx.fillStyle = '#ff4d4d';
-                        flickerCtx.font = 'bold 40px sans-serif';
-                        flickerCtx.textAlign = 'center';
-                        flickerCtx.fillText('Video plays perfectly', 256, 110);
-                        flickerCtx.fillText('when uploaded to GitHub!', 256, 160);
-                        flickerTexture.needsUpdate = true;
+                        // PLAY REAL VIDEO WITH AUDIO!
+                        tvScreen.material.map = videoTexture;
+                        tvScreen.material.needsUpdate = true;
+                        videoEl.play();
                         
-                        startZoomSequence();
+                        // We set up a listener so the 3D scene waits for the FULL video to play
+                        // before zooming in and transitioning to the map.
+                        videoEl.addEventListener('ended', () => {
+                             startZoomSequence();
+                        });
+                        
+                        // Backup timer just in case the browser blocks the 'ended' event
+                        setTimeout(() => {
+                            if(appState === 'room') startZoomSequence();
+                        }, videoEl.duration * 1000 + 1000 || 60000); 
                     }
                 }, 100);
             }, null, 2.7);
@@ -447,7 +444,6 @@
             gsap.to(camera.position, {
                 x: 0, y: 2.75, z: -3.8, 
                 duration: 2.5,
-                delay: 4, 
                 ease: "power3.inOut",
                 onComplete: () => {
                     roomGroup.visible = false;
@@ -479,12 +475,10 @@
                 if (mapProgress >= 1) {
                     mapProgress = 1;
                     if(mapGroup.visible) {
-                         // --- THE VALENTINE'S TRANSITION ---
                          mapGroup.visible = false;
                          bookGroup.visible = true;
-                         heartParticles.visible = true; // Turn on the rain!
+                         heartParticles.visible = true; 
                          
-                         // Instantly change the background to a rich, deep burgundy
                          scene.background.setHex(0x2a0510);
                          
                          appState = 'book';
@@ -500,17 +494,15 @@
             }
 
             if (appState === 'book') {
-                // Animate the falling hearts
                 const positions = heartParticles.geometry.attributes.position.array;
                 for(let i=1; i < particleCount * 3; i+=3) {
-                    positions[i] -= 0.02; // Speed of the falling rain
+                    positions[i] -= 0.02; 
                     if(positions[i] < -5) {
-                        positions[i] = 15; // Loop back to the top when they hit the bottom
+                        positions[i] = 15; 
                     }
                 }
                 heartParticles.geometry.attributes.position.needsUpdate = true;
 
-                // Animate the pages
                 pages.forEach(p => {
                     const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.95 : 0;
                     p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.08;
