@@ -49,8 +49,8 @@
 </head>
 <body>
     
-    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="position: absolute; width: 0; height: 0; left: -9999px;"></video>
-    <audio id="tvAudio" src="song.mp3" loop style="position: absolute; width: 0; height: 0; left: -9999px;"></audio>
+    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="position: absolute; width: 1px; height: 1px; opacity: 0;"></video>
+    <audio id="tvAudio" src="song.mp3" loop style="display:none;"></audio>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
@@ -144,7 +144,6 @@
         tvStand.castShadow = true;
         roomGroup.add(tvStand);
 
-        // Vertical TV Box for vertical video
         const tvBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
         tvBox.position.set(0, 3.1, -5.5);
         tvBox.castShadow = true;
@@ -401,9 +400,10 @@
 
         document.getElementById('startBtn').addEventListener('click', () => {
             
-            // THE FIX: Immediately unlock audio and start video silently
-            audioEl.play().then(() => { audioEl.pause(); audioEl.currentTime = 0; }).catch(e => console.log(e));
-            videoEl.play().catch(e => console.log(e)); // Starts playing silently in the background
+            // THE ULTIMATE FIX: We hit play the EXACT second you click the button. 
+            // Browsers cannot block this.
+            audioEl.play().catch(e => console.log(e));
+            videoEl.play().catch(e => console.log(e));
 
             const uiLayer = document.getElementById('ui-layer');
             uiLayer.style.opacity = 0;
@@ -427,13 +427,11 @@
                     if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         
-                        // THE FIX: Reveal the video that is already playing, and turn on the audio!
-                        videoEl.currentTime = 0; // Rewind to start
+                        // Reveal the video that has been running safely in the background!
                         tvScreen.material.map = videoTexture;
                         tvScreen.material.needsUpdate = true;
                         
-                        audioEl.play().catch(e => console.log(e));
-                        
+                        // Wait 15 seconds, then zoom to the map (while song keeps playing)
                         setTimeout(startZoomSequence, 15000); 
                     }
                 }, 100);
