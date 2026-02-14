@@ -49,7 +49,8 @@
 </head>
 <body>
     
-    <video id="tvVideo" src="our-video.mp4" playsinline style="display:none;"></video>
+    <video id="tvVideo" src="video.mp4" playsinline style="display:none;"></video>
+    <audio id="tvAudio" src="song.mp3" preload="auto"></audio>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
@@ -177,6 +178,7 @@
         flickerCtx.fillRect(0, 0, 512, 256);
 
         const videoEl = document.getElementById('tvVideo');
+        const audioEl = document.getElementById('tvAudio'); // Hooking up the audio!
         const videoTexture = new THREE.VideoTexture(videoEl);
 
         const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), new THREE.MeshBasicMaterial({ map: flickerTexture }));
@@ -401,6 +403,11 @@
             const uiLayer = document.getElementById('ui-layer');
             uiLayer.style.opacity = 0;
             setTimeout(() => uiLayer.remove(), 1500); 
+            
+            // This initializes audio on mobile devices so it isn't blocked later
+            audioEl.play().catch(()=>{});
+            audioEl.pause();
+            audioEl.currentTime = 0;
 
             const tl = gsap.timeline();
 
@@ -420,21 +427,21 @@
                     if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         
-                        // PLAY REAL VIDEO WITH AUDIO!
+                        // PLAY VIDEO AND AUDIO TOGETHER!
                         tvScreen.material.map = videoTexture;
                         tvScreen.material.needsUpdate = true;
                         videoEl.play();
+                        audioEl.play();
                         
-                        // We set up a listener so the 3D scene waits for the FULL video to play
-                        // before zooming in and transitioning to the map.
+                        // Wait for the video compilation to finish before transitioning
                         videoEl.addEventListener('ended', () => {
                              startZoomSequence();
                         });
                         
-                        // Backup timer just in case the browser blocks the 'ended' event
+                        // Safety backup timer in case the browser blocks the 'ended' event
                         setTimeout(() => {
                             if(appState === 'room') startZoomSequence();
-                        }, videoEl.duration * 1000 + 1000 || 60000); 
+                        }, 60000); // Set to 60 seconds as a backup
                     }
                 }, 100);
             }, null, 2.7);
@@ -457,70 +464,4 @@
 
         window.addEventListener('pointerdown', (e) => {
             if(appState !== 'book') return;
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(pages.map(p => p.mesh));
-            if(intersects.length > 0) {
-                let clickedPage = pages.find(p => p.mesh === intersects[0].object);
-                if(clickedPage) clickedPage.mesh.userData.flipped = !clickedPage.mesh.userData.flipped;
-            }
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (appState === 'map') {
-                mapProgress += 0.0015; 
-                if (mapProgress >= 1) {
-                    mapProgress = 1;
-                    if(mapGroup.visible) {
-                         mapGroup.visible = false;
-                         bookGroup.visible = true;
-                         heartParticles.visible = true; 
-                         
-                         scene.background.setHex(0x2a0510);
-                         
-                         appState = 'book';
-                         camera.position.set(0, 1, 6);
-                         camera.lookAt(0, 0, 0);
-                         document.getElementById('instructions').style.display = 'block';
-                    }
-                } else {
-                    const currentPos = routeCurve.getPoint(mapProgress);
-                    car.position.copy(currentPos);
-                    car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
-                }
-            }
-
-            if (appState === 'book') {
-                const positions = heartParticles.geometry.attributes.position.array;
-                for(let i=1; i < particleCount * 3; i+=3) {
-                    positions[i] -= 0.02; 
-                    if(positions[i] < -5) {
-                        positions[i] = 15; 
-                    }
-                }
-                heartParticles.geometry.attributes.position.needsUpdate = true;
-
-                pages.forEach(p => {
-                    const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.95 : 0;
-                    p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.08;
-                });
-            }
-
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-    </script>
-</body>
-</html>
+            mouse.x
