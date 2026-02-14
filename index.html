@@ -234,14 +234,68 @@
         car.castShadow = true;
         mapGroup.add(car);
 
-        // --- SCENE 3: THE REALISTIC 10-PAGE BOOK ---
+        // --- SCENE 3: THE HEART PARTICLE RAIN ---
+        // 1. Generate a perfect white heart texture on a hidden canvas
+        const heartCanvas = document.createElement('canvas');
+        heartCanvas.width = 64; heartCanvas.height = 64;
+        const hCtx = heartCanvas.getContext('2d');
+        hCtx.fillStyle = '#ffffff'; // White allows us to tint it later
+        hCtx.beginPath();
+        hCtx.moveTo(32, 15);
+        hCtx.bezierCurveTo(32, 12, 25, 0, 15, 0);
+        hCtx.bezierCurveTo(0, 0, 0, 17.5, 0, 17.5);
+        hCtx.bezierCurveTo(0, 30, 20, 42, 32, 55);
+        hCtx.bezierCurveTo(44, 42, 64, 30, 64, 17.5);
+        hCtx.bezierCurveTo(64, 17.5, 64, 0, 49, 0);
+        hCtx.bezierCurveTo(39, 0, 32, 12, 32, 15);
+        hCtx.fill();
+        const heartTexture = new THREE.CanvasTexture(heartCanvas);
+
+        // 2. Build the particle system
+        const particleCount = 200;
+        const particlesGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        const colArray = new Float32Array(particleCount * 3);
+        
+        // A mix of vibrant pinks and deep reds
+        const colorsOfLove = [new THREE.Color(0xff4d4d), new THREE.Color(0xffb3b3), new THREE.Color(0xff1a1a), new THREE.Color(0xffccd5)];
+
+        for(let i=0; i < particleCount; i++) {
+            // Random scatter
+            posArray[i*3] = (Math.random() - 0.5) * 20; // x
+            posArray[i*3+1] = Math.random() * 20 - 5;   // y
+            posArray[i*3+2] = (Math.random() - 0.5) * 10 - 2; // z
+            
+            // Assign random love color
+            const c = colorsOfLove[Math.floor(Math.random() * colorsOfLove.length)];
+            colArray[i*3] = c.r; 
+            colArray[i*3+1] = c.g; 
+            colArray[i*3+2] = c.b;
+        }
+
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeo.setAttribute('color', new THREE.BufferAttribute(colArray, 3));
+
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.8,
+            map: heartTexture,
+            transparent: true,
+            opacity: 0.8,
+            vertexColors: true, // This applies our custom red/pink tints
+            depthWrite: false
+        });
+
+        const heartParticles = new THREE.Points(particlesGeo, particleMat);
+        heartParticles.visible = false; // Hide until book scene
+        scene.add(heartParticles);
+
+        // --- SCENE 4: THE REALISTIC 10-PAGE BOOK ---
         const bookGroup = new THREE.Group();
         bookGroup.visible = false;
         scene.add(bookGroup);
         
         const pages = [];
 
-        // Helper function to draw a beautiful heart shape
         function drawHeart(ctx, x, y, width, height) {
             ctx.save();
             ctx.beginPath();
@@ -257,7 +311,6 @@
             ctx.restore();
         }
 
-        // Helper function to wrap long paragraphs naturally
         function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
             const words = text.split(' ');
             let line = '';
@@ -276,29 +329,24 @@
             ctx.fillText(line, x, y);
         }
 
-        // The Engine that generates realistic paper textures
         function createPageTexture(pageNum, title, text) {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 1024;
             const ctx = canvas.getContext('2d');
             
-            // Base Paper Color (Warm parchment)
             ctx.fillStyle = '#fdf6e3'; 
             ctx.fillRect(0, 0, 512, 1024); 
 
-            // Simulate the shadow of the book spine to make the paper look 3D
             const spineGradient = ctx.createLinearGradient(0, 0, 50, 0);
             spineGradient.addColorStop(0, 'rgba(0,0,0,0.15)');
             spineGradient.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = spineGradient;
             ctx.fillRect(0, 0, 50, 1024);
 
-            // Draw decorative hearts
             drawHeart(ctx, 256, 850, 60, 60);
             if(pageNum === 1) drawHeart(ctx, 256, 150, 100, 100);
 
-            // Typography Setup
-            ctx.fillStyle = '#3a2b25'; // Dark, warm ink color
+            ctx.fillStyle = '#3a2b25'; 
             
             if(pageNum === 1) {
                  ctx.font = 'bold 60px "Georgia", serif'; ctx.textAlign = 'center';
@@ -309,18 +357,15 @@
             } else {
                 ctx.font = 'bold 35px "Georgia", serif'; ctx.textAlign = 'center';
                 ctx.fillText(title, 256, 120);
-                
-                // Write the long paragraphs
                 ctx.font = 'italic 28px "Georgia", serif';
                 ctx.textAlign = 'left';
-                wrapText(ctx, text, 60, 250, 400, 45); // Automatically wraps the text
+                wrapText(ctx, text, 60, 250, 400, 45); 
             }
             return new THREE.CanvasTexture(canvas);
         }
 
-        // Your Custom Love Letters
         const bookChapters = [
-            { title: "", text: "" }, // Cover (handled above)
+            { title: "", text: "" }, 
             { title: "Chapter 1: The Beginning", text: "From the very first moment I saw you, I knew my life was about to change. There was a light in your eyes that drew me in, and a warmth in your smile that felt instantly like coming home." },
             { title: "Chapter 2: The Little Things", text: "Every single day we spend together, I discover something new to love about you. You have this incredible, effortless ability to make the world around you so much brighter." },
             { title: "Chapter 3: Through My Eyes", text: "I know that sometimes you might doubt yourself, or wonder if you are enough. But I want you to look at yourself the way I see you. You are brilliant, you are resilient, and you are absolutely breathtaking." },
@@ -335,13 +380,9 @@
         for(let i = 0; i < 10; i++) {
             const pivot = new THREE.Group();
             pivot.position.set(-1.5, 0, (10 - i) * 0.01); 
-            
-            // Added slight roughness to make it look like non-reflective paper
             const pageMat = new THREE.MeshStandardMaterial({ 
                 map: createPageTexture(i+1, bookChapters[i].title, bookChapters[i].text), 
-                side: THREE.DoubleSide,
-                roughness: 0.9,
-                metalness: 0.1
+                side: THREE.DoubleSide, roughness: 0.9, metalness: 0.1
             });
             const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.015), pageMat);
             pageMesh.position.set(1.5, 0, 0); 
@@ -351,7 +392,6 @@
             pages.push({ pivot: pivot, mesh: pageMesh });
         }
         
-        // Velvet-like Dark Red Cover
         const backCover = new THREE.Mesh(
             new THREE.BoxGeometry(3.2, 4.2, 0.05), 
             new THREE.MeshStandardMaterial({ color: 0x5a0000, roughness: 1.0 })
@@ -439,8 +479,14 @@
                 if (mapProgress >= 1) {
                     mapProgress = 1;
                     if(mapGroup.visible) {
+                         // --- THE VALENTINE'S TRANSITION ---
                          mapGroup.visible = false;
                          bookGroup.visible = true;
+                         heartParticles.visible = true; // Turn on the rain!
+                         
+                         // Instantly change the background to a rich, deep burgundy
+                         scene.background.setHex(0x2a0510);
+                         
                          appState = 'book';
                          camera.position.set(0, 1, 6);
                          camera.lookAt(0, 0, 0);
@@ -454,7 +500,17 @@
             }
 
             if (appState === 'book') {
-                // Creates the smooth, realistic page-turning hinge effect
+                // Animate the falling hearts
+                const positions = heartParticles.geometry.attributes.position.array;
+                for(let i=1; i < particleCount * 3; i+=3) {
+                    positions[i] -= 0.02; // Speed of the falling rain
+                    if(positions[i] < -5) {
+                        positions[i] = 15; // Loop back to the top when they hit the bottom
+                    }
+                }
+                heartParticles.geometry.attributes.position.needsUpdate = true;
+
+                // Animate the pages
                 pages.forEach(p => {
                     const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.95 : 0;
                     p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.08;
