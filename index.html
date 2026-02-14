@@ -2,216 +2,161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Our Story - Full 3D Test</title>
+    <title>For Jess - Our Journey</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         canvas { display: block; }
         
-        /* Start Button */
-        #startBtn {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px 40px; font-size: 24px; font-weight: bold;
-            background-color: #ff4d4d; color: white;
-            border: none; border-radius: 30px;
-            cursor: pointer; z-index: 10;
-            box-shadow: 0 10px 20px rgba(255, 77, 77, 0.4);
-            transition: 0.3s;
+        button {
+            position: absolute; z-index: 10; padding: 15px 30px;
+            font-size: 20px; font-weight: bold; background-color: #ff4d4d;
+            color: white; border: none; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4); transition: 0.3s;
         }
-        #startBtn:hover { background-color: #ff1a1a; transform: translate(-50%, -50%) scale(1.05); }
-
-        /* Next Chapter Button (Hidden at first) */
-        #nextBtn {
-            position: absolute;
-            bottom: 40px; right: 40px;
-            padding: 15px 30px; font-size: 18px; font-weight: bold;
-            background-color: #ff4d4d; color: white;
-            border: none; border-radius: 30px;
-            cursor: pointer; z-index: 10; display: none;
-            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
-        }
-        #nextBtn:hover { background-color: #ff1a1a; }
+        button:hover { background-color: #ff1a1a; }
+        
+        #startBtn { top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px 40px; font-size: 24px; }
+        #nextBtn { bottom: 40px; right: 40px; display: none; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
 
+    <video id="tvVideo" src="1001189975.mp4" playsinline style="display:none;" loop></video>
+    <video id="parkVideo2" src="1001189978.mp4" playsinline style="display:none;" loop></video>
+
     <button id="startBtn">Enter the Room</button>
     <button id="nextBtn">Next Chapter ➔</button>
 
     <script>
-        // --- 1. CORE 3D SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111111);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        const light = new THREE.AmbientLight(0xffffff, 1);
+        const light = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(light);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        dirLight.position.set(5, 5, 5);
-        scene.add(dirLight);
 
-        // --- 2. SCENE 1: THE SIMPSONS 3D ROOM ---
+        const textureLoader = new THREE.TextureLoader();
+
+        // --- SCENE 1: SIMPSONS ROOM IN 3D SPACE ---
         const roomGroup = new THREE.Group();
         scene.add(roomGroup);
 
-        // Pink Wall
-        const wall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), new THREE.MeshLambertMaterial({ color: 0xff88cc }));
-        wall.position.z = -6;
-        roomGroup.add(wall);
+        // Load the Simpsons image onto a 3D wall
+        const roomTexture = textureLoader.load('1001230172.jpg');
+        const roomWall = new THREE.Mesh(
+            new THREE.PlaneGeometry(16, 9), 
+            new THREE.MeshBasicMaterial({ map: roomTexture })
+        );
+        roomWall.position.set(0, 0, -5);
+        roomGroup.add(roomWall);
 
-        // Green Floor
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 20), new THREE.MeshLambertMaterial({ color: 0x20b2aa }));
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -3;
-        roomGroup.add(floor);
-
-        // Purple TV Stand
-        const tvStand = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 2), new THREE.MeshLambertMaterial({ color: 0x784c98 }));
-        tvStand.position.set(0, -2, -5);
-        roomGroup.add(tvStand);
-
-        // The TV Box
-        const tvBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 2.5, 0.5), new THREE.MeshLambertMaterial({ color: 0x444444 }));
-        tvBox.position.set(0, 0.5, -5);
-        roomGroup.add(tvBox);
-
-        // The TV Screen (This will flicker like a video)
-        const tvScreenMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
-        const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), tvScreenMat);
-        tvScreen.position.set(0, 0.5, -4.74);
+        // The 3D Video Screen mapped perfectly over the drawing's TV
+        const videoEl = document.getElementById('tvVideo');
+        const videoTex = new THREE.VideoTexture(videoEl);
+        const tvScreen = new THREE.Mesh(
+            new THREE.PlaneGeometry(3.6, 2.6), 
+            new THREE.MeshBasicMaterial({ map: videoTex })
+        );
+        
+        // These coordinates place the video directly over the TV in the bottom left
+        tvScreen.position.set(-3.5, -2.1, -4.9); 
+        tvScreen.rotation.z = -0.05; // Slight tilt to match the artwork
         roomGroup.add(tvScreen);
 
-        // Initial Camera Position (Sitting on the couch)
-        camera.position.set(0, 1, 4);
+        camera.position.set(0, 0, 4);
 
-
-        // --- 3. SCENE 2: THE 3D BOOK & CAR ---
+        // --- SCENE 2: 3D BOOK WITH REAL PHOTO ---
         const bookGroup = new THREE.Group();
-        bookGroup.visible = false; // Hidden until we zoom into the TV
+        bookGroup.visible = false;
         scene.add(bookGroup);
 
         const pageGeo = new THREE.PlaneGeometry(3, 4);
         
-        // Left Page (Placeholder for Photo/Video)
-        const leftPageMat = new THREE.MeshLambertMaterial({ color: 0xffb3b3, side: THREE.DoubleSide });
+        // Left Page gets the real photo of you two
+        const photoTex = textureLoader.load('1001191122.jpg');
+        const leftPageMat = new THREE.MeshBasicMaterial({ map: photoTex, side: THREE.DoubleSide });
         const leftPage = new THREE.Mesh(pageGeo, leftPageMat);
         leftPage.position.set(-1.5, 0, 0);
         leftPage.rotation.y = Math.PI / 8;
         bookGroup.add(leftPage);
 
-        // Right Page (Map Base)
-        const rightPage = new THREE.Mesh(pageGeo, new THREE.MeshLambertMaterial({ color: 0xeaf6ff, side: THREE.DoubleSide }));
+        const rightPage = new THREE.Mesh(pageGeo, new THREE.MeshBasicMaterial({ color: 0xeaf6ff, side: THREE.DoubleSide }));
         rightPage.position.set(1.5, 0, 0);
         rightPage.rotation.y = -Math.PI / 8;
         bookGroup.add(rightPage);
 
-        // The Routes
-        // Route 1: Rametsane to Shorobe St
-        const pointsRoute1 = [
-            new THREE.Vector3(0.5, -1.5, 0.2), 
-            new THREE.Vector3(1.5, 0, 0.5), 
-            new THREE.Vector3(2.5, 1.5, 0.2)
-        ];
-        // Route 2: Shorobe St to FNB Park
-        const pointsRoute2 = [
-            new THREE.Vector3(2.5, 1.5, 0.2),  
-            new THREE.Vector3(1.0, 1.0, 0.6),  
-            new THREE.Vector3(0.5, -1.0, 0.2)   
-        ];
-
-        let currentCurve = new THREE.CatmullRomCurve3(pointsRoute1);
-        const routeGeo = new THREE.BufferGeometry().setFromPoints(currentCurve.getPoints(50));
-        const routeLine = new THREE.Line(routeGeo, new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 }));
+        // Routes
+        const pointsRoute1 = [new THREE.Vector3(0.5, -1.5, 0.2), new THREE.Vector3(1.5, 0, 0.5), new THREE.Vector3(2.5, 1.5, 0.2)];
+        const pointsRoute2 = [new THREE.Vector3(2.5, 1.5, 0.2), new THREE.Vector3(1.0, 1.0, 0.6), new THREE.Vector3(0.5, -1.0, 0.2)];
+        
+        let curve = new THREE.CatmullRomCurve3(pointsRoute1);
+        const routeLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(curve.getPoints(50)), 
+            new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 })
+        );
         bookGroup.add(routeLine);
 
-        // The 3D Car
-        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.2), new THREE.MeshLambertMaterial({ color: 0x222222 }));
+        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0x222222 }));
         bookGroup.add(car);
 
-
-        // --- 4. THE INTERACTION & LOGIC ---
-        let isTvPlaying = false;
+        // --- LOGIC & ANIMATIONS ---
         let isBookScene = false;
         let fraction = 0;
 
-        // Button 1: Enter the Room
         document.getElementById('startBtn').addEventListener('click', () => {
             document.getElementById('startBtn').style.display = 'none';
-            isTvPlaying = true; // Make the TV flicker
+            videoEl.play();
 
-            // Simulate watching the TV for 3 seconds, then ZOOM!
+            // Wait 4 seconds for her to watch the video, then ZOOM!
             setTimeout(() => {
-                isTvPlaying = false;
-                tvScreenMat.color.setHex(0x000000); // Screen goes black during zoom
-
                 gsap.to(camera.position, {
-                    z: -4.5, // Push camera directly into the TV screen
-                    y: 0.5,
-                    duration: 2,
-                    ease: "power2.inOut",
+                    x: -3.5, y: -2.1, z: -4.5, // Fly exactly into the TV coordinates
+                    duration: 2, ease: "power2.inOut",
                     onComplete: () => {
-                        // Swap the scenes
                         roomGroup.visible = false;
                         bookGroup.visible = true;
                         
-                        // Reset camera to look at the book
-                        camera.position.set(0, 0, 6);
+                        camera.position.set(0, 0, 6); // Pull back for the book
                         isBookScene = true;
-
-                        // Show the "Next Chapter" button
                         document.getElementById('nextBtn').style.display = 'block';
                     }
                 });
-            }, 3000);
+            }, 4000);
         });
 
-        // Button 2: Next Chapter (FNB Park)
         document.getElementById('nextBtn').addEventListener('click', () => {
-            // Change the left page color to simulate the new video playing
-            leftPageMat.color.setHex(0xb3d9ff); 
+            // Swap photo for the 2nd video!
+            const vid2 = document.getElementById('parkVideo2');
+            const tex2 = new THREE.VideoTexture(vid2);
+            leftPage.material.map = tex2;
+            leftPage.material.needsUpdate = true;
+            vid2.play();
+
+            // Change route to FNB Park
+            curve = new THREE.CatmullRomCurve3(pointsRoute2);
+            routeLine.geometry.setFromPoints(curve.getPoints(50));
+            fraction = 0;
             
-            // Swap the route to FNB Park
-            currentCurve = new THREE.CatmullRomCurve3(pointsRoute2);
-            routeLine.geometry.setFromPoints(currentCurve.getPoints(50));
-            
-            // Reset the car to the start of the new route
-            fraction = 0; 
+            // Hide button after click
+            document.getElementById('nextBtn').style.display = 'none'; 
         });
 
-
-        // --- 5. THE ANIMATION ENGINE ---
         function animate() {
             requestAnimationFrame(animate);
-
-            // Make the TV flicker to look like a movie
-            if (isTvPlaying) {
-                const flicker = 0.5 + Math.random() * 0.5;
-                tvScreenMat.color.setHSL(0.5, 1, flicker);
-            }
-
             if (isBookScene) {
-                // Smooth 3D floating effect for the book
                 bookGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05;
-                bookGroup.rotation.x = Math.sin(Date.now() * 0.0005) * 0.05;
-                
-                // Drive the car along the current route
-                fraction += 0.003; // Speed of the car
-                if (fraction > 1) fraction = 0; // Loop back to start
-                car.position.copy(currentCurve.getPoint(fraction));
-                // Make the car face the direction it is driving
-                car.lookAt(currentCurve.getPoint(Math.min(fraction + 0.01, 1)));
+                fraction += 0.003;
+                if (fraction > 1) fraction = 0;
+                car.position.copy(curve.getPoint(fraction));
             }
-
             renderer.render(scene, camera);
         }
         animate();
 
-        // Keep it looking good if the window is resized
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
