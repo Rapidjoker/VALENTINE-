@@ -7,7 +7,9 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; }
+        
+        /* THE FIX: We tell the text container to stay hidden by default */
+        #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; display: none; }
         
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -400,8 +402,6 @@
 
         document.getElementById('startBtn').addEventListener('click', () => {
             
-            // THE GUARANTEED VOLUME HACK
-            // We start the audio immediately but quietly.
             audioEl.volume = 0;
             audioEl.play().catch(e => console.log("Audio silent play blocked:", e));
             videoEl.play().catch(e => console.log("Video silent play blocked:", e));
@@ -431,7 +431,6 @@
                         tvScreen.material.map = videoTexture;
                         tvScreen.material.needsUpdate = true;
                         
-                        // REWIND AND TURN THE VOLUME UP!
                         videoEl.currentTime = 0;
                         audioEl.currentTime = 0;
                         audioEl.volume = 1; 
@@ -450,6 +449,10 @@
                 onComplete: () => {
                     roomGroup.visible = false;
                     mapGroup.visible = true;
+                    
+                    // THE FIX: We turn the map text ON only when the map appears
+                    cssContainer.style.display = 'block';
+                    
                     appState = 'map';
                     camera.position.set(-15, 25, 25); 
                     camera.lookAt(0, 0, 0);
@@ -480,6 +483,9 @@
                          mapGroup.visible = false;
                          bookGroup.visible = true;
                          heartParticles.visible = true; 
+                         
+                         // THE FIX: We instantly turn the map text OFF when the book appears
+                         cssContainer.style.display = 'none';
                          
                          scene.background.setHex(0x2a0510);
                          
