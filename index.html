@@ -9,11 +9,10 @@
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; }
         
-        /* The Pitch Black Opening Screen */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             display: flex; justify-content: center; align-items: center; z-index: 10;
-            background: #000000; transition: opacity 2s ease; /* 2-second smooth fade in */
+            background: #000000; transition: opacity 2s ease; 
         }
         
         button {
@@ -71,12 +70,12 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000000);
         
+        // Camera starts "standing" behind the couch
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 2, 10); 
+        camera.position.set(0, 4.5, 7); 
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        // Enable shadows for the 3D city
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
@@ -87,39 +86,101 @@
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        const textureLoader = new THREE.TextureLoader();
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
         
-        // Directional light creates the dramatic shadows on the 3D buildings
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 10);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(2, 8, 5);
         dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
         scene.add(dirLight);
 
-        // --- SCENE 1: SIMPSONS ROOM ---
+        // --- SCENE 1: THE 3D SIMPSONS ROOM ---
         const roomGroup = new THREE.Group();
         scene.add(roomGroup);
 
-        const roomTexture = textureLoader.load('image_28.png'); 
-        const roomGeo = new THREE.PlaneGeometry(16, 12); 
-        const roomMat = new THREE.MeshBasicMaterial({ map: roomTexture, side: THREE.DoubleSide });
-        const roomBackdrop = new THREE.Mesh(roomGeo, roomMat);
-        roomBackdrop.position.set(0, 2, -5); 
-        roomGroup.add(roomBackdrop);
+        // 1. Floor & Walls (Teal & Pink)
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x1da289 }));
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        roomGroup.add(floor);
 
-        const remote = new THREE.Mesh(
-            new THREE.BoxGeometry(0.2, 0.05, 0.5), 
-            new THREE.MeshStandardMaterial({ color: 0x222222 })
-        );
-        remote.position.set(-1.5, 0.8, -2); 
-        remote.rotation.y = -0.2;
-        roomGroup.add(remote);
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xff91af }); // Signature Pink
+        const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
+        backWall.position.set(0, 7.5, -8);
+        backWall.receiveShadow = true;
+        roomGroup.add(backWall);
 
+        const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
+        leftWall.rotation.y = Math.PI / 2;
+        leftWall.position.set(-12, 7.5, 0);
+        leftWall.receiveShadow = true;
+        roomGroup.add(leftWall);
+
+        const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
+        rightWall.rotation.y = -Math.PI / 2;
+        rightWall.position.set(12, 7.5, 0);
+        rightWall.receiveShadow = true;
+        roomGroup.add(rightWall);
+
+        // 2. Oval Rug (Purple/Pinkish)
+        const rug = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 0.05, 32), new THREE.MeshStandardMaterial({ color: 0xc964af }));
+        rug.scale.set(1, 1, 0.6); 
+        rug.position.set(0, 0.02, -1);
+        roomGroup.add(rug);
+
+        // 3. Orange Couch
+        const couchMat = new THREE.MeshStandardMaterial({ color: 0xd2691e });
+        const couchSeat = new THREE.Mesh(new THREE.BoxGeometry(6, 1, 2.5), couchMat);
+        couchSeat.position.set(0, 0.5, 2.5);
+        couchSeat.castShadow = true;
+        const couchBack = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 0.5), couchMat);
+        couchBack.position.set(0, 2, 3.5);
+        couchBack.castShadow = true;
+        roomGroup.add(couchSeat, couchBack);
+
+        // 4. Wooden Coffee Table
+        const table = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 1.5), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
+        table.position.set(0, 0.5, -1.5);
+        table.castShadow = true;
+        roomGroup.add(table);
+
+        // 5. Purple TV Stand
+        const tvStand = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2), new THREE.MeshStandardMaterial({ color: 0x784c98 }));
+        tvStand.position.set(0, 0.75, -5.5);
+        tvStand.castShadow = true;
+        roomGroup.add(tvStand);
+
+        // 6. Retro TV Box (Greyish)
+        const tvBox = new THREE.Mesh(new THREE.BoxGeometry(3.5, 2.5, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
+        tvBox.position.set(0, 2.75, -5.5);
+        tvBox.castShadow = true;
+        roomGroup.add(tvBox);
+
+        // 7. Decor (Lamp & Picture Frame)
+        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({ color: 0x8a2be2 }));
+        lampBase.position.set(-4.5, 2, -6);
+        const lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1, 16), new THREE.MeshStandardMaterial({ color: 0xff4500 }));
+        lampShade.position.set(-4.5, 4.5, -6);
+        roomGroup.add(lampBase, lampShade);
+
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 0.1), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
+        frame.position.set(0, 6, -7.9);
+        const picture = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.3), new THREE.MeshBasicMaterial({ color: 0x87ceeb })); // Boat painting sky color
+        picture.position.set(0, 6, -7.84);
+        roomGroup.add(frame, picture);
+
+        // 8. The 3D Remote
+        const remoteGroup = new THREE.Group();
+        const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+        const remoteBtn = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.08), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        remoteBtn.position.set(0, 0.03, -0.2); // Red button on front
+        remoteGroup.add(remoteBody, remoteBtn);
+        remoteGroup.position.set(0.5, 1.02, -1.5); // Sitting on coffee table
+        roomGroup.add(remoteGroup);
+
+        // 9. TV Screen (Flicker & Video)
         const flickerCanvas = document.createElement('canvas');
         flickerCanvas.width = 256; flickerCanvas.height = 256;
         const flickerCtx = flickerCanvas.getContext('2d');
@@ -128,11 +189,8 @@
         const videoEl = document.getElementById('tvVideo');
         const videoTexture = new THREE.VideoTexture(videoEl);
 
-        const tvScreen = new THREE.Mesh(
-            new THREE.PlaneGeometry(1.8, 1.4), 
-            new THREE.MeshBasicMaterial({ map: flickerTexture }) 
-        );
-        tvScreen.position.set(1.65, 0.95, -4.9); 
+        const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), new THREE.MeshBasicMaterial({ map: flickerTexture }));
+        tvScreen.position.set(0, 2.75, -4.74); 
         roomGroup.add(tvScreen);
 
         // --- SCENE 2: THE 3D CITY MAP ---
@@ -140,46 +198,30 @@
         mapGroup.visible = false;
         scene.add(mapGroup);
 
-        // Dark asphalt ground
-        const mapFloor = new THREE.Mesh(
-            new THREE.PlaneGeometry(80, 80), 
-            new THREE.MeshStandardMaterial({ color: 0x111111 })
-        );
+        const mapFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: 0x111111 }));
         mapFloor.rotation.x = -Math.PI / 2;
         mapFloor.receiveShadow = true;
         mapGroup.add(mapFloor);
 
-        // --- GENERATE THE 3D CITY SKYLINE ---
         const cityGroup = new THREE.Group();
         const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
-        // A sleek, dark architectural look for the buildings
         const buildingMat = new THREE.MeshStandardMaterial({ color: 0x2a3b4c, roughness: 0.8 });
 
-        // Create 300 random buildings
         for (let i = 0; i < 300; i++) {
             const building = new THREE.Mesh(buildingGeo, buildingMat);
             building.castShadow = true;
             building.receiveShadow = true;
             
-            // Randomly scatter them across a 50x50 area
             const x = (Math.random() - 0.5) * 50;
             const z = (Math.random() - 0.5) * 50;
-            
-            // Give them random heights to look like a skyline
             const height = Math.random() * 8 + 1;
             building.scale.set(1 + Math.random(), height, 1 + Math.random());
-            
             building.position.set(x, height / 2, z);
 
-            // Leave a "street" path so they don't block the car's route too much
-            // The route runs roughly diagonal from bottom-left to top-right
-            if (Math.abs(x - z) > 5) { 
-                cityGroup.add(building);
-            }
+            if (Math.abs(x - z) > 5) cityGroup.add(building);
         }
         mapGroup.add(cityGroup);
 
-        // Markers & Labels
         const startPos = new THREE.Vector3(-12, 0.5, -12);
         const endPos = new THREE.Vector3(14, 0.5, 14);
 
@@ -195,7 +237,6 @@
         const endDiv = document.createElement('div'); endDiv.className = 'map-label label-end'; endDiv.textContent = '59866 Shorobe St, Block 7';
         endMarker.add(new CSS2DObject(endDiv));
 
-        // The Route
         const routeCurve = new THREE.CatmullRomCurve3([
             startPos, new THREE.Vector3(-6, 0.5, -4), new THREE.Vector3(2, 0.5, 0), new THREE.Vector3(8, 0.5, 6), endPos
         ]);
@@ -206,7 +247,6 @@
         routeLine.computeLineDistances();
         mapGroup.add(routeLine);
 
-        // The Car
         const car = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 2.0), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
         car.castShadow = true;
         mapGroup.add(car);
@@ -269,22 +309,27 @@
         let flickerInterval;
 
         document.getElementById('startBtn').addEventListener('click', () => {
-            // Smoothly fade out the pitch black screen
             const uiLayer = document.getElementById('ui-layer');
             uiLayer.style.opacity = 0;
-            setTimeout(() => uiLayer.remove(), 2000); // 2 second fade
+            setTimeout(() => uiLayer.remove(), 2000); 
 
             const tl = gsap.timeline();
 
+            // 1. "Walk" up and sit on the couch
             tl.to(camera.position, { 
-                z: 3, y: 1.5, duration: 3, ease: "power2.inOut" 
+                z: 2.5, y: 2.5, duration: 2, ease: "power2.inOut" 
             }, 0);
 
-            tl.to(remote.position, { 
-                x: 0, y: 1, z: 2, duration: 1.5, ease: "back.in(1)"
+            // 2. Pick up the remote from the coffee table
+            tl.to(remoteGroup.position, { 
+                x: 0.5, y: 1.8, z: 1.5, duration: 1, ease: "back.in(1)"
             }, 1.5);
-            tl.to(remote.scale, { x:0, y:0, z:0, duration: 0.2 }, 2.9);
+            tl.to(remoteGroup.rotation, { x: 0.5 }, 1.5);
+            
+            // "Click" it and hide it
+            tl.to(remoteGroup.scale, { x:0, y:0, z:0, duration: 0.2 }, 2.5);
 
+            // 3. Flicker and play TV
             tl.call(() => {
                 let flickerCount = 0;
                 flickerInterval = setInterval(() => {
@@ -300,12 +345,12 @@
                         startZoomSequence();
                     }
                 }, 100);
-            }, null, 3);
+            }, null, 2.7);
         });
 
         function startZoomSequence() {
             gsap.to(camera.position, {
-                x: 1.65, y: 0.95, z: -4.0, 
+                x: 0, y: 2.75, z: -3.8, // Zoom right to the TV screen!
                 duration: 2.5,
                 delay: 4,
                 ease: "power3.inOut",
@@ -313,7 +358,6 @@
                     roomGroup.visible = false;
                     mapGroup.visible = true;
                     appState = 'map';
-                    // Angle the camera to look down at the 3D City
                     camera.position.set(-15, 25, 25); 
                     camera.lookAt(0, 0, 0);
                 }
@@ -351,10 +395,6 @@
                     const currentPos = routeCurve.getPoint(mapProgress);
                     car.position.copy(currentPos);
                     car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
-                    
-                    // Optional: Make the camera follow the car through the city!
-                    // camera.position.set(currentPos.x - 10, currentPos.y + 10, currentPos.z + 10);
-                    // camera.lookAt(currentPos);
                 }
             }
 
