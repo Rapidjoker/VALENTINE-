@@ -49,8 +49,8 @@
 </head>
 <body>
     
-    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted autoplay loop crossorigin="anonymous" style="position: absolute; width: 0; height: 0; left: -9999px;"></video>
-    <audio id="tvAudio" src="song.mp3" crossorigin="anonymous" loop style="position: absolute; width: 0; height: 0; left: -9999px;"></audio>
+    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="position: absolute; width: 0; height: 0; left: -9999px;"></video>
+    <audio id="tvAudio" src="song.mp3" loop style="position: absolute; width: 0; height: 0; left: -9999px;"></audio>
 
     <div id="ui-layer">
         <button id="startBtn">Enter Our World</button>
@@ -144,7 +144,7 @@
         tvStand.castShadow = true;
         roomGroup.add(tvStand);
 
-        // THE FIX: Changed the TV Box to be a vertical rectangle
+        // Vertical TV Box for vertical video
         const tvBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
         tvBox.position.set(0, 3.1, -5.5);
         tvBox.castShadow = true;
@@ -170,7 +170,6 @@
         remoteGroup.position.set(0.5, 1.02, -1.5); 
         roomGroup.add(remoteGroup);
 
-        // THE FIX: Changed the canvas to be vertical
         const flickerCanvas = document.createElement('canvas');
         flickerCanvas.width = 256; flickerCanvas.height = 512;
         const flickerCtx = flickerCanvas.getContext('2d');
@@ -182,7 +181,6 @@
         const audioEl = document.getElementById('tvAudio');
         const videoTexture = new THREE.VideoTexture(videoEl);
 
-        // THE FIX: Changed the TV Screen to be vertical
         const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 3.0), new THREE.MeshBasicMaterial({ map: flickerTexture }));
         tvScreen.position.set(0, 3.1, -4.74); 
         roomGroup.add(tvScreen);
@@ -403,9 +401,9 @@
 
         document.getElementById('startBtn').addEventListener('click', () => {
             
-            // THE AUDIO/VIDEO FIX: These must be triggered right away
-            audioEl.play().catch(e => console.log("Audio unlock failed:", e));
-            // We don't pause the audio, we let it start playing instantly!
+            // THE FIX: Immediately unlock audio and start video silently
+            audioEl.play().then(() => { audioEl.pause(); audioEl.currentTime = 0; }).catch(e => console.log(e));
+            videoEl.play().catch(e => console.log(e)); // Starts playing silently in the background
 
             const uiLayer = document.getElementById('ui-layer');
             uiLayer.style.opacity = 0;
@@ -422,23 +420,20 @@
                 let flickerCount = 0;
                 flickerInterval = setInterval(() => {
                     flickerCtx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#333333';
-                    flickerCtx.fillRect(0,0,256,512); // Vertical flicker
+                    flickerCtx.fillRect(0,0,256,512);
                     flickerTexture.needsUpdate = true;
                     flickerCount++;
                     
                     if(flickerCount > 15) { 
                         clearInterval(flickerInterval);
                         
-                        // PLAY VIDEO! (Audio is already playing)
+                        // THE FIX: Reveal the video that is already playing, and turn on the audio!
+                        videoEl.currentTime = 0; // Rewind to start
                         tvScreen.material.map = videoTexture;
                         tvScreen.material.needsUpdate = true;
                         
-                        // We reset the video to the beginning just in case it started playing silently
-                        videoEl.currentTime = 0; 
-                        videoEl.play().catch(e => console.log("Video play failed:", e));
+                        audioEl.play().catch(e => console.log(e));
                         
-                        // Let her watch the TV memories for 15 seconds, 
-                        // then zoom into the map while the song keeps playing!
                         setTimeout(startZoomSequence, 15000); 
                     }
                 }, 100);
@@ -447,7 +442,6 @@
 
         function startZoomSequence() {
             gsap.to(camera.position, {
-                // THE FIX: Updated zoom coordinates to match the new vertical TV position
                 x: 0, y: 3.1, z: -3.8, 
                 duration: 2.5,
                 ease: "power3.inOut",
