@@ -2,38 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>For Jess</title>
+    <title>Our Story - For Jess</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
         canvas { display: block; }
-        
-        /* Style for the Turn Page Button */
-        #nextPageBtn {
+        #startBtn {
             position: absolute;
-            bottom: 40px;
-            right: 40px;
-            padding: 15px 30px;
-            font-size: 18px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 24px;
             background-color: #ff4d4d;
             color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
-            transition: 0.3s;
-        }
-        #nextPageBtn:hover {
-            background-color: #ff1a1a;
-            transform: scale(1.05);
+            z-index: 10;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-    <video id="parkVideo" src="1001189975.mp4" loop playsinline style="display:none;"></video>
 
-    <button id="nextPageBtn">Next Chapter ➔</button>
+    <button id="startBtn">Enter the Room</button>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="app.js"></script>
+    <video id="tvVideo" src="1001189975.mp4" playsinline style="display:none;"></video>
+
+    <script>
+        // --- 1. CORE SETUP ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(light);
+
+        // --- 2. SCENE 1: THE SITTING ROOM & TV ---
+        const roomGroup = new THREE.Group();
+        scene.add(roomGroup);
+
+        // A simple wall to represent the room
+        const wallGeo = new THREE.PlaneGeometry(20, 10);
+        const wallMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+        const wall = new THREE.Mesh(wallGeo, wallMat);
+        wall.position.z = -5;
+        roomGroup.add(wall);
+
+        // The TV Screen
+        const tvGeo = new THREE.PlaneGeometry(4, 2.5); // 16:9 ratio
+        const videoElement = document.getElementById('tvVideo');
+        const videoTexture = new THREE.VideoTexture(videoElement);
+        const tvMat = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const tvScreen = new THREE.Mesh(tvGeo, tvMat);
+        tvScreen.position.set(0, 0, -4.9); // Slightly in front of the wall
+        roomGroup.add(tvScreen);
+
+        // Initial Camera Position (Sitting on the couch)
+        camera.position.set(0, 0, 5);
+
+        // --- 3. SCENE 2: THE 3D BOOK (Hidden at first) ---
+        const bookGroup = new THREE.Group();
+        bookGroup.visible = false; // Hide until the transition
+        scene.add(bookGroup);
+
+        const textureLoader = new THREE.TextureLoader();
+        const photoTexture = textureLoader.load('1001191122.jpg'); // Your photo
+
+        const pageGeo = new THREE.PlaneGeometry(3, 4);
+        
+        // Left Page (Photo)
+        const leftPage = new THREE.Mesh(pageGeo, new THREE.MeshBasicMaterial({ map: photoTexture, side: THREE.DoubleSide }));
+        leftPage.position.set(-1.5, 0, 0);
+        leftPage.rotation.y = Math.PI / 8;
+        bookGroup.add(leftPage);
+
+        // Right Page (Map Base)
+        const rightPage = new THREE.Mesh(pageGeo, new THREE.MeshBasicMaterial({ color: 0xeaf6ff, side: THREE.DoubleSide }));
+        rightPage.position.set(1.5, 0, 0);
+        rightPage.rotation.y = -Math.PI / 8;
+        bookGroup.add(rightPage);
+
+        // The Route (Rametsane to Shorobe St)
+        const curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0.5, -1.5, 0.2), new THREE.Vector3(1.5, 0, 0.5), new THREE.Vector3(2.5, 1.5, 0.2)
+        ]);
+        const routeGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(50));
+        const routeLine = new THREE.Line(routeGeo, new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 }));
+        bookGroup.add(routeLine);
+
+        // The 3D Car
+        const car = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0x222222 }));
+        bookGroup.add(car);
+
+        // --- 4. THE INTERACTION & ANIMATION LOGIC ---
+        let isBookScene = false;
+        let fraction = 0;
+
+        // Button Click to Start the Experience
+        document.getElementById('startBtn').addEventListener('click', () => {
+            document.getElementById('startBtn').style.display = 'none';
+            videoElement.play(); // Turn on the TV
+        });
+
+        // The Magic Zoom Transition
+        // We trigger this 2 seconds before the video ends
+        videoElement.addEventListener('timeupdate', () => {
+            if (videoElement.duration > 0 && videoElement.currentTime >= videoElement.duration - 2) {
+                // Zoom camera right into the TV screen
+                gsap.to(camera.position, {
+                    z: -4.8, // Push right up to the TV
+                    duration: 2,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        // Once we hit the TV, swap scenes!
+                        roomGroup.visible = false;
+                        bookGroup.visible = true;
+                        
+                        // Pull camera back to view the book
+                        camera.position.set(0, 0, 6);
+                        isBookScene = true;
+                    }
+                });
+            }
+        });
+
+        // Main Render Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isBookScene) {
+                // Animate the book floating slightly
+                bookGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.1;
+                
+                // Animate the car driving
+                fraction += 0.005;
+                if (fraction > 1) fraction = 0;
+                car.position.copy(curve.getPoint(fraction));
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
