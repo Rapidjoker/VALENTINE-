@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For Jess - Happy Valentine's Day</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; }
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
+        /* THE TEXT FIX: We start it at 0 opacity so it is completely invisible initially */
         #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
         
         #ui-layer {
@@ -16,6 +17,7 @@
             background: #000000; transition: opacity 1.5s ease; 
         }
         
+        /* THE TRANSITION LAYER: This creates the smooth movie fade effect */
         #transition-overlay {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #2a0510; opacity: 0; pointer-events: none; z-index: 15;
@@ -36,13 +38,6 @@
         .label-start { background: rgba(255, 215, 0, 0.5); border: 2px solid gold; color: gold; }
         .label-end { background: rgba(255, 105, 180, 0.5); border: 2px solid hotpink; color: hotpink; }
         
-        #drag-instruction {
-            position: absolute; top: 80px; width: 100%; text-align: center;
-            color: white; font-size: 18px; opacity: 0; z-index: 5; pointer-events: none;
-            text-shadow: 1px 1px 3px black; transition: opacity 1s ease;
-            font-weight: bold;
-        }
-
         #instructions {
             position: absolute; bottom: 30px; width: 100%; text-align: center;
             color: white; font-size: 18px; display: none; z-index: 5; pointer-events: none;
@@ -53,9 +48,9 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-                "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm"
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/",
+                "gsap": "https://unpkg.com/gsap@3.12.2/index.js"
             }
         }
     </script>
@@ -69,7 +64,6 @@
         <button id="startBtn">Enter Our World</button>
     </div>
     <div id="transition-overlay"></div>
-    <div id="drag-instruction">🚗 YOU are driving! <br> Drag screen to look around & see Jess</div>
     <div id="instructions">Click the right side of the book to turn pages</div>
     
     <div id="webgl-container"></div>
@@ -83,16 +77,15 @@
         const container = document.getElementById('webgl-container');
         const cssContainer = document.getElementById('css2d-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87ceeb);
-        scene.fog = new THREE.Fog(0x87ceeb, 10, 60);
+        scene.background = new THREE.Color(0x000000); 
         
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 4.5, 7); 
 
-        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.BasicShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const labelRenderer = new CSS2DRenderer();
@@ -102,14 +95,14 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 40, 20);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(2, 8, 5);
         dirLight.castShadow = true;
         scene.add(dirLight);
 
-        // --- SCENE 1: LIVING ROOM ---
+        // --- SCENE 1: THE 3D SIMPSONS ROOM ---
         const roomGroup = new THREE.Group();
         scene.add(roomGroup);
 
@@ -121,30 +114,61 @@
         const wallMat = new THREE.MeshStandardMaterial({ color: 0xff91af }); 
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
         backWall.position.set(0, 7.5, -8);
+        backWall.receiveShadow = true;
         roomGroup.add(backWall);
+
         const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
-        leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-12, 7.5, 0); roomGroup.add(leftWall);
+        leftWall.rotation.y = Math.PI / 2;
+        leftWall.position.set(-12, 7.5, 0);
+        leftWall.receiveShadow = true;
+        roomGroup.add(leftWall);
+
         const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
-        rightWall.rotation.y = -Math.PI / 2; rightWall.position.set(12, 7.5, 0); roomGroup.add(rightWall);
+        rightWall.rotation.y = -Math.PI / 2;
+        rightWall.position.set(12, 7.5, 0);
+        rightWall.receiveShadow = true;
+        roomGroup.add(rightWall);
 
         const rug = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 0.05, 32), new THREE.MeshStandardMaterial({ color: 0xc964af }));
-        rug.scale.set(1, 1, 0.6); rug.position.set(0, 0.02, -1); roomGroup.add(rug);
+        rug.scale.set(1, 1, 0.6); 
+        rug.position.set(0, 0.02, -1);
+        roomGroup.add(rug);
 
         const couchMat = new THREE.MeshStandardMaterial({ color: 0xd2691e });
         const couchSeat = new THREE.Mesh(new THREE.BoxGeometry(6, 1, 2.5), couchMat);
         couchSeat.position.set(0, 0.5, 2.5);
+        couchSeat.castShadow = true;
         const couchBack = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 0.5), couchMat);
         couchBack.position.set(0, 2, 3.5);
+        couchBack.castShadow = true;
         roomGroup.add(couchSeat, couchBack);
 
         const table = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 1.5), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
-        table.position.set(0, 0.5, -1.5); roomGroup.add(table);
+        table.position.set(0, 0.5, -1.5);
+        table.castShadow = true;
+        roomGroup.add(table);
 
         const tvStand = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2), new THREE.MeshStandardMaterial({ color: 0x784c98 }));
-        tvStand.position.set(0, 0.75, -5.5); roomGroup.add(tvStand);
+        tvStand.position.set(0, 0.75, -5.5);
+        tvStand.castShadow = true;
+        roomGroup.add(tvStand);
 
         const tvBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
-        tvBox.position.set(0, 3.1, -5.5); roomGroup.add(tvBox);
+        tvBox.position.set(0, 3.1, -5.5);
+        tvBox.castShadow = true;
+        roomGroup.add(tvBox);
+
+        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.2, 4), new THREE.MeshStandardMaterial({ color: 0x8a2be2 }));
+        lampBase.position.set(-4.5, 2, -6);
+        const lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1, 16), new THREE.MeshStandardMaterial({ color: 0xff4500 }));
+        lampShade.position.set(-4.5, 4.5, -6);
+        roomGroup.add(lampBase, lampShade);
+
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 0.1), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
+        frame.position.set(0, 6, -7.9);
+        const picture = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.3), new THREE.MeshBasicMaterial({ color: 0x87ceeb }));
+        picture.position.set(0, 6, -7.84);
+        roomGroup.add(frame, picture);
 
         const remoteGroup = new THREE.Group();
         const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
@@ -158,318 +182,387 @@
         flickerCanvas.width = 256; flickerCanvas.height = 512;
         const flickerCtx = flickerCanvas.getContext('2d');
         const flickerTexture = new THREE.CanvasTexture(flickerCanvas);
-        flickerCtx.fillStyle = '#111111'; flickerCtx.fillRect(0, 0, 256, 512);
+        flickerCtx.fillStyle = '#111111';
+        flickerCtx.fillRect(0, 0, 256, 512);
 
         const videoEl = document.getElementById('tvVideo');
         const audioEl = document.getElementById('tvAudio');
         const videoTexture = new THREE.VideoTexture(videoEl);
 
         const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 3.0), new THREE.MeshBasicMaterial({ map: flickerTexture }));
-        tvScreen.position.set(0, 3.1, -4.74); roomGroup.add(tvScreen);
+        tvScreen.position.set(0, 3.1, -4.74); 
+        roomGroup.add(tvScreen);
 
-        // --- SCENE 2: THE CITY (First Person) ---
+        // --- SCENE 2: THE 3D CITY MAP ---
         const mapGroup = new THREE.Group();
         mapGroup.visible = false;
         scene.add(mapGroup);
 
-        const grassGeo = new THREE.PlaneGeometry(300, 300);
-        const grassMat = new THREE.MeshStandardMaterial({ color: 0x3b5e2b });
-        const mapFloor = new THREE.Mesh(grassGeo, grassMat);
+        const mapFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: 0x111111 }));
         mapFloor.rotation.x = -Math.PI / 2;
         mapFloor.receiveShadow = true;
         mapGroup.add(mapFloor);
 
-        const routePoints = [
-            new THREE.Vector3(-40, 0.2, -40),
-            new THREE.Vector3(-10, 0.2, -10),
-            new THREE.Vector3(10, 0.2, 0),
-            new THREE.Vector3(30, 0.2, 20),
-            new THREE.Vector3(50, 0.2, 50)
-        ];
-        const routeCurve = new THREE.CatmullRomCurve3(routePoints);
-        
-        const roadGeo = new THREE.TubeGeometry(routeCurve, 100, 3, 8, false);
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-        const road = new THREE.Mesh(roadGeo, roadMat);
-        road.scale.y = 0.02; 
-        road.position.y = 0.05;
-        road.receiveShadow = true;
-        mapGroup.add(road);
+        const cityGroup = new THREE.Group();
+        const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
+        const buildingMat = new THREE.MeshStandardMaterial({ color: 0x2a3b4c, roughness: 0.8 });
 
-        const cityLifeGroup = new THREE.Group();
-        mapGroup.add(cityLifeGroup);
+        for (let i = 0; i < 300; i++) {
+            const building = new THREE.Mesh(buildingGeo, buildingMat);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            const x = (Math.random() - 0.5) * 50;
+            const z = (Math.random() - 0.5) * 50;
+            const height = Math.random() * 8 + 1;
+            building.scale.set(1 + Math.random(), height, 1 + Math.random());
+            building.position.set(x, height / 2, z);
+            if (Math.abs(x - z) > 5) cityGroup.add(building);
+        }
+        mapGroup.add(cityGroup);
 
-        const buildingMat = new THREE.MeshStandardMaterial({ color: 0x8a9ea8 });
-        const treeMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-        const personMat = new THREE.MeshStandardMaterial({ color: 0xffa500 });
+        const startPos = new THREE.Vector3(-12, 0.5, -12);
+        const endPos = new THREE.Vector3(14, 0.5, 14);
 
-        for(let i=0; i<150; i++) {
-            const x = (Math.random() - 0.5) * 120;
-            const z = (Math.random() - 0.5) * 120;
-            if(Math.abs(x - z) > 10) {
-                const type = Math.random();
-                if(type > 0.6) { 
-                    const h = Math.random() * 15 + 5;
-                    const b = new THREE.Mesh(new THREE.BoxGeometry(3, h, 3), buildingMat);
-                    b.position.set(x, h/2, z);
-                    cityLifeGroup.add(b);
-                } else if (type > 0.3) { 
-                    const t = new THREE.Group();
-                    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2), trunkMat); tr.position.y = 1;
-                    const l = new THREE.Mesh(new THREE.ConeGeometry(2, 4, 8), treeMat); l.position.y = 3;
-                    t.add(tr, l);
-                    t.position.set(x, 0, z);
-                    cityLifeGroup.add(t);
-                } else { 
-                    const p = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1, 4), personMat);
-                    p.position.set(x, 0.8, z);
-                    cityLifeGroup.add(p);
-                }
-            }
+        const startMarker = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
+        startMarker.position.copy(startPos);
+        mapGroup.add(startMarker);
+        const startDiv = document.createElement('div'); startDiv.className = 'map-label label-start'; startDiv.textContent = '10996 Rametsane';
+        startMarker.add(new CSS2DObject(startDiv));
+
+        const endMarker = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xff69b4 }));
+        endMarker.position.copy(endPos);
+        mapGroup.add(endMarker);
+        const endDiv = document.createElement('div'); endDiv.className = 'map-label label-end'; endDiv.textContent = '59866 Shorobe St, Block 7';
+        endMarker.add(new CSS2DObject(endDiv));
+
+        const routeCurve = new THREE.CatmullRomCurve3([
+            startPos, new THREE.Vector3(-6, 0.5, -4), new THREE.Vector3(2, 0.5, 0), new THREE.Vector3(8, 0.5, 6), endPos
+        ]);
+        const routeLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(routeCurve.getPoints(150)),
+            new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 1, gapSize: 0.5, linewidth: 3 })
+        );
+        routeLine.computeLineDistances();
+        mapGroup.add(routeLine);
+
+        const car = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 2.0), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        car.castShadow = true;
+        mapGroup.add(car);
+
+        // --- SCENE 3: THE HEART PARTICLE RAIN ---
+        const heartCanvas = document.createElement('canvas');
+        heartCanvas.width = 64; heartCanvas.height = 64;
+        const hCtx = heartCanvas.getContext('2d');
+        hCtx.fillStyle = '#ffffff'; 
+        hCtx.beginPath();
+        hCtx.moveTo(32, 15);
+        hCtx.bezierCurveTo(32, 12, 25, 0, 15, 0);
+        hCtx.bezierCurveTo(0, 0, 0, 17.5, 0, 17.5);
+        hCtx.bezierCurveTo(0, 30, 20, 42, 32, 55);
+        hCtx.bezierCurveTo(44, 42, 64, 30, 64, 17.5);
+        hCtx.bezierCurveTo(64, 17.5, 64, 0, 49, 0);
+        hCtx.bezierCurveTo(39, 0, 32, 12, 32, 15);
+        hCtx.fill();
+        const heartTexture = new THREE.CanvasTexture(heartCanvas);
+
+        const particleCount = 200;
+        const particlesGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        const colArray = new Float32Array(particleCount * 3);
+        const colorsOfLove = [new THREE.Color(0xff4d4d), new THREE.Color(0xffb3b3), new THREE.Color(0xff1a1a), new THREE.Color(0xffccd5)];
+
+        for(let i=0; i < particleCount; i++) {
+            posArray[i*3] = (Math.random() - 0.5) * 20; 
+            posArray[i*3+1] = Math.random() * 20 - 5;   
+            posArray[i*3+2] = (Math.random() - 0.5) * 10 - 2; 
+            
+            const c = colorsOfLove[Math.floor(Math.random() * colorsOfLove.length)];
+            colArray[i*3] = c.r; colArray[i*3+1] = c.g; colArray[i*3+2] = c.b;
         }
 
-        const stallColors = [0xff0000, 0x0000ff, 0xffff00];
-        for(let i=0; i<6; i++) {
-            const stall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({ color: stallColors[i%3] }));
-            stall.position.set(-20 + i*8, 1, -25 + i*8); 
-            cityLifeGroup.add(stall);
-        }
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeo.setAttribute('color', new THREE.BufferAttribute(colArray, 3));
 
-        const trafficCars = [];
-        const trafficGeo = new THREE.BoxGeometry(2, 1, 4);
-        const trafficMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); 
-        
-        for(let i=0; i<5; i++) {
-            const tCar = new THREE.Mesh(trafficGeo, trafficMat);
-            const offset = (i / 5);
-            tCar.userData = { offset: offset, speed: 0.0005 + Math.random()*0.0005 };
-            mapGroup.add(tCar);
-            trafficCars.push(tCar);
-        }
-
-        const carGroup = new THREE.Group();
-        mapGroup.add(carGroup);
-
-        const carBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 5), new THREE.MeshStandardMaterial({ color: 0x222222, visible: false }));
-        carBody.position.y = 0.75;
-        carGroup.add(carBody);
-
-        const dashboard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-        dashboard.position.set(0, 0.8, -0.8);
-        carGroup.add(dashboard);
-
-        const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: 0x000000 }));
-        wheel.position.set(0.6, 1.1, -0.4);
-        wheel.rotation.x = -0.5;
-        carGroup.add(wheel);
-
-        const jessGroup = new THREE.Group();
-        const jBody = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({ color: 0xff69b4 })); 
-        jBody.position.y = 0.4;
-        const jHead = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8d5524 })); 
-        jHead.position.y = 1.0;
-        const jHair = new THREE.Mesh(new THREE.SphereGeometry(0.28), new THREE.MeshStandardMaterial({ color: 0x000000 })); 
-        jHair.position.y = 1.05; jHair.scale.y = 0.8;
-        jessGroup.add(jBody, jHead, jHair);
-        jessGroup.position.set(-0.6, 0.2, 0.2); 
-        carGroup.add(jessGroup);
-
-        const cameraPivot = new THREE.Group();
-        cameraPivot.position.set(0.6, 1.4, 0.3); 
-        carGroup.add(cameraPivot);
-
-        let isDragging = false;
-        let prevX = 0, prevY = 0;
-        let camYaw = 0, camPitch = 0;
-
-        window.addEventListener('pointerdown', e => {
-            isDragging = true; prevX = e.clientX; prevY = e.clientY;
-            if(appState === 'book') {
-                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(pages.map(p => p.mesh));
-                if(intersects.length > 0) intersects[0].object.userData.flipped = !intersects[0].object.userData.flipped;
-            }
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.8, map: heartTexture, transparent: true, opacity: 0.8, vertexColors: true, depthWrite: false
         });
-        window.addEventListener('pointermove', e => {
-            if(isDragging && appState === 'map') {
-                const dx = e.clientX - prevX;
-                const dy = e.clientY - prevY;
-                camYaw -= dx * 0.005;
-                camPitch -= dy * 0.005;
-                camPitch = Math.max(-0.5, Math.min(0.5, camPitch));
-                camYaw = Math.max(-1.5, Math.min(1.5, camYaw));
-                cameraPivot.rotation.set(camPitch, camYaw, 0);
-                prevX = e.clientX; prevY = e.clientY;
-            }
-        });
-        window.addEventListener('pointerup', () => isDragging = false);
 
+        const heartParticles = new THREE.Points(particlesGeo, particleMat);
+        heartParticles.visible = false; 
+        scene.add(heartParticles);
+
+        // --- SCENE 4: THE REALISTIC 10-PAGE BOOK ---
         const bookGroup = new THREE.Group();
         bookGroup.visible = false;
         scene.add(bookGroup);
         
         const pages = [];
+
+        function drawHeart(ctx, x, y, width, height) {
+            ctx.save();
+            ctx.beginPath();
+            const topCurveHeight = height * 0.3;
+            ctx.moveTo(x, y + topCurveHeight);
+            ctx.bezierCurveTo(x, y, x - width / 2, y, x - width / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x - width / 2, y + (height + topCurveHeight) / 2, x, y + (height + topCurveHeight) / 2, x, y + height);
+            ctx.bezierCurveTo(x, y + (height + topCurveHeight) / 2, x + width / 2, y + (height + topCurveHeight) / 2, x + width / 2, y + topCurveHeight);
+            ctx.bezierCurveTo(x + width / 2, y, x, y, x, y + topCurveHeight);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(255, 77, 77, 0.6)";
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            for(let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        function createPageTexture(pageNum, title, text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#fdf6e3'; 
+            ctx.fillRect(0, 0, 512, 1024); 
+
+            const spineGradient = ctx.createLinearGradient(0, 0, 50, 0);
+            spineGradient.addColorStop(0, 'rgba(0,0,0,0.15)');
+            spineGradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = spineGradient;
+            ctx.fillRect(0, 0, 50, 1024);
+
+            drawHeart(ctx, 256, 850, 60, 60);
+            if(pageNum === 1) drawHeart(ctx, 256, 150, 100, 100);
+
+            ctx.fillStyle = '#3a2b25'; 
+            
+            if(pageNum === 1) {
+                 ctx.font = 'bold 60px "Georgia", serif'; ctx.textAlign = 'center';
+                 ctx.fillText("Our Story", 256, 400);
+                 ctx.font = 'italic 35px "Georgia", serif';
+                 ctx.fillText("For my beautiful Jess", 256, 500);
+                 ctx.fillText("Happy Valentine's Day", 256, 580);
+            } else {
+                ctx.font = 'bold 35px "Georgia", serif'; ctx.textAlign = 'center';
+                ctx.fillText(title, 256, 120);
+                ctx.font = 'italic 28px "Georgia", serif';
+                ctx.textAlign = 'left';
+                wrapText(ctx, text, 60, 250, 400, 45); 
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
         const bookChapters = [
-            {t:"", b:""}, 
-            {t:"Chapter 1", b:"From the very first moment..."}, 
-            {t:"Chapter 2", b:"Every single day..."},
-            {t:"Chapter 3", b:"I know sometimes..."},
-            {t:"Chapter 4", b:"You are my safe place..."},
-            {t:"Chapter 5", b:"Your heart of gold..."},
-            {t:"Chapter 6", b:"My biggest cheerleader..."},
-            {t:"Chapter 7", b:"You are a masterpiece..."},
-            {t:"Chapter 8", b:"Building our future..."},
-            {t:"Chapter 9", b:"I love you forever."}
+            { title: "", text: "" }, 
+            { title: "Chapter 1: The Beginning", text: "From the very first moment I saw you, I knew my life was about to change. There was a light in your eyes that drew me in, and a warmth in your smile that felt instantly like coming home." },
+            { title: "Chapter 2: The Little Things", text: "Every single day we spend together, I discover something new to love about you. You have this incredible, effortless ability to make the world around you so much brighter." },
+            { title: "Chapter 3: Through My Eyes", text: "I know that sometimes you might doubt yourself, or wonder if you are enough. But I want you to look at yourself the way I see you. You are brilliant, you are resilient, and you are absolutely breathtaking." },
+            { title: "Chapter 4: My Safe Place", text: "Whether we are laughing until we can't breathe, exploring the city together, or just sitting in quiet comfort, there is nowhere else I would rather be. You are my safe place, Jess." },
+            { title: "Chapter 5: Your Heart", text: "I love the way your mind works. I love your passion, your immense kindness, and the gentle, caring way you treat the people around you. You have a heart of absolute gold." },
+            { title: "Chapter 6: My Promise", text: "I promise to always be your biggest cheerleader. On the days when you feel on top of the world, I will be right there celebrating. And on the days when things feel heavy, I will hold your hand through the storm." },
+            { title: "Chapter 7: Your Worth", text: "You are the most beautiful part of my life, both inside and out. Please never forget your worth, Jess. You are a masterpiece, and I am the luckiest person in the world to call you mine." },
+            { title: "Chapter 8: Our Future", text: "As we keep driving forward, building our future together step by step, I want you to know that my love for you only grows deeper. I am so incredibly excited for every tomorrow I get to spend with you." },
+            { title: "Chapter 9: Forever", text: "Thank you for being exactly who you are. Thank you for letting me love you, and for loving me back. Jess, never forget how incredibly special you are. You mean a lot to me. Happy Valentine's Day, my love." }
         ];
-        function createPage(idx, title, body) {
-            const cvs = document.createElement('canvas'); cvs.width=256; cvs.height=512;
-            const c = cvs.getContext('2d');
-            c.fillStyle='#fdf6e3'; c.fillRect(0,0,256,512);
-            c.fillStyle='#4a0000'; c.font='20px serif'; c.textAlign='center';
-            if(idx===1){ c.font='30px serif'; c.fillText("Our Story",128,200); c.fillText("For Jess",128,250); }
-            else { c.fillText(title,128,100); c.font='14px serif'; c.textAlign='left'; wrapText(c,body,20,200,210,20);}
-            return new THREE.CanvasTexture(cvs);
-        }
-        function wrapText(c,t,x,y,mw,lh){const w=t.split(' ');let l='';for(let n=0;n<w.length;n++){const tl=l+w[n]+' ';if(c.measureText(tl).width>mw&&n>0){c.fillText(l,x,y);l=w[n]+' ';y+=lh}else{l=tl}}c.fillText(l,x,y)}
 
-        for(let i=0; i<10; i++){
-            const piv = new THREE.Group(); piv.position.set(-1.5,0,(10-i)*0.01);
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(3,4,0.02), new THREE.MeshStandardMaterial({map:createPage(i+1,bookChapters[i].t,bookChapters[i].b)}));
-            mesh.position.set(1.5,0,0); mesh.userData={flipped:false};
-            piv.add(mesh); bookGroup.add(piv); pages.push({mesh:mesh, pivot:piv});
+        for(let i = 0; i < 10; i++) {
+            const pivot = new THREE.Group();
+            pivot.position.set(-1.5, 0, (10 - i) * 0.01); 
+            const pageMat = new THREE.MeshStandardMaterial({ 
+                map: createPageTexture(i+1, bookChapters[i].title, bookChapters[i].text), 
+                side: THREE.DoubleSide, roughness: 0.9, metalness: 0.1
+            });
+            const pageMesh = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 0.015), pageMat);
+            pageMesh.position.set(1.5, 0, 0); 
+            pageMesh.userData = { id: i, flipped: false };
+            pivot.add(pageMesh);
+            bookGroup.add(pivot);
+            pages.push({ pivot: pivot, mesh: pageMesh });
         }
-        const backCover = new THREE.Mesh(new THREE.BoxGeometry(3.2,4.2,0.05), new THREE.MeshStandardMaterial({color:0x5a0000}));
-        backCover.position.z = -0.1; bookGroup.add(backCover);
+        
+        const backCover = new THREE.Mesh(
+            new THREE.BoxGeometry(3.2, 4.2, 0.05), 
+            new THREE.MeshStandardMaterial({ color: 0x5a0000, roughness: 1.0 })
+        );
+        backCover.position.set(0,0,-0.1);
+        bookGroup.add(backCover);
 
-        const partGeo = new THREE.BufferGeometry();
-        const pPos = new Float32Array(450); 
-        const pCol = new Float32Array(450);
-        for(let i=0;i<150;i++){
-            pPos[i*3]=(Math.random()-0.5)*20; pPos[i*3+1]=Math.random()*10; pPos[i*3+2]=(Math.random()-0.5)*10;
-            pCol[i*3]=1; pCol[i*3+1]=0; pCol[i*3+2]=0; 
-        }
-        partGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
-        partGeo.setAttribute('color', new THREE.BufferAttribute(pCol,3));
-        const particles = new THREE.Points(partGeo, new THREE.PointsMaterial({size:0.5, vertexColors:true}));
-        particles.visible = false; scene.add(particles);
+        // --- THE CINEMATIC ANIMATION SEQUENCE ---
 
-        let appState = 'room';
+        let appState = 'room'; 
         let mapProgress = 0;
-        let isTransitioning = false;
+        let isTransitioning = false; // Prevents the map from looping when done
+        let flickerInterval;
 
         document.getElementById('startBtn').addEventListener('click', () => {
-            audioEl.volume = 0; audioEl.play().catch(()=>{}); videoEl.play().catch(()=>{});
             
-            const tl = gsap.timeline();
-            document.getElementById('ui-layer').style.opacity = 0;
-            setTimeout(() => document.getElementById('ui-layer').remove(), 1500);
+            audioEl.volume = 0;
+            audioEl.play().catch(e => console.log("Audio silent play blocked:", e));
+            videoEl.play().catch(e => console.log("Video silent play blocked:", e));
 
-            tl.to(camera.position, {z:2.5, y:2.5, duration:2});
-            tl.to(remoteGroup.position, {x:0.5, y:1.8, z:1.5, duration:1}, 1.5);
-            tl.to(remoteGroup.scale, {x:0, y:0, z:0, duration:0.2}, 2.5);
-            
+            const uiLayer = document.getElementById('ui-layer');
+            uiLayer.style.opacity = 0;
+            setTimeout(() => uiLayer.remove(), 1500); 
+
+            const tl = gsap.timeline();
+
+            tl.to(camera.position, { z: 2.5, y: 2.5, duration: 2, ease: "power2.inOut" }, 0);
+            tl.to(remoteGroup.position, { x: 0.5, y: 1.8, z: 1.5, duration: 1, ease: "back.in(1)" }, 1.5);
+            tl.to(remoteGroup.rotation, { x: 0.5 }, 1.5);
+            tl.to(remoteGroup.scale, { x:0, y:0, z:0, duration: 0.2 }, 2.5);
+
             tl.call(() => {
-                let f=0; 
-                let int = setInterval(()=>{
-                    flickerCtx.fillStyle=Math.random()>0.5?'#fff':'#333'; flickerCtx.fillRect(0,0,256,512); flickerTexture.needsUpdate=true;
-                    f++;
-                    if(f>15) {
-                        clearInterval(int);
-                        videoEl.currentTime=0; audioEl.volume=1;
-                        tvScreen.material.map=videoTexture; tvScreen.material.needsUpdate=true;
-                        setTimeout(startDrive, 15000);
+                let flickerCount = 0;
+                flickerInterval = setInterval(() => {
+                    flickerCtx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#333333';
+                    flickerCtx.fillRect(0,0,256,512);
+                    flickerTexture.needsUpdate = true;
+                    flickerCount++;
+                    
+                    if(flickerCount > 15) { 
+                        clearInterval(flickerInterval);
+                        
+                        tvScreen.material.map = videoTexture;
+                        tvScreen.material.needsUpdate = true;
+                        
+                        videoEl.currentTime = 0;
+                        audioEl.currentTime = 0;
+                        audioEl.volume = 1; 
+                        
+                        setTimeout(startZoomSequence, 15000); 
                     }
                 }, 100);
             }, null, 2.7);
         });
 
-        function startDrive() {
+        function startZoomSequence() {
             gsap.to(camera.position, {
-                x: 0, y: 3.1, z: -4.0, duration: 2, ease: "power2.in",
+                x: 0, y: 3.1, z: -3.8, 
+                duration: 2.5,
+                ease: "power3.inOut",
                 onComplete: () => {
                     roomGroup.visible = false;
                     mapGroup.visible = true;
-                    cssContainer.style.opacity = 1;
-                    document.getElementById('drag-instruction').style.opacity = 1;
                     
-                    cameraPivot.add(camera);
-                    camera.position.set(0,0,0);
-                    camera.rotation.set(0,0,0);
+                    // FADE IN THE MAP TEXT SMOOTHLY
+                    cssContainer.style.opacity = 1;
                     
                     appState = 'map';
+                    camera.position.set(-15, 25, 25); 
+                    camera.lookAt(0, 0, 0);
                 }
             });
         }
 
+        // --- THE NEW CINEMATIC TRANSITION FROM MAP TO BOOK ---
+        function startBookTransition() {
+            if(isTransitioning) return;
+            isTransitioning = true;
+            
+            // 1. INSTANTLY FADE OUT THE MAP TEXT
+            cssContainer.style.opacity = 0;
+
+            const tl = gsap.timeline();
+            
+            // 2. Swoop the camera down directly into the pink destination marker!
+            tl.to(camera.position, { x: 14, y: 1, z: 15, duration: 2, ease: "power2.in" }, 0);
+            
+            // 3. Fade the screen to a deep romantic burgundy
+            tl.to("#transition-overlay", { opacity: 1, duration: 1 }, 1);
+            
+            // 4. While the screen is completely covered by the overlay, swap the 3D models
+            tl.call(() => {
+                mapGroup.visible = false;
+                bookGroup.visible = true;
+                heartParticles.visible = true; 
+                scene.background.setHex(0x2a0510);
+                
+                // Position camera right in front of the book
+                camera.position.set(0, 1, 6);
+                camera.lookAt(0, 0, 0);
+            }, null, 2);
+
+            // 5. Fade the overlay back out to reveal the book!
+            tl.to("#transition-overlay", { opacity: 0, duration: 1.5 }, 2.5);
+            
+            // 6. Give control to the user
+            tl.call(() => {
+                appState = 'book';
+                document.getElementById('instructions').style.display = 'block';
+            }, null, 4);
+        }
+
+        window.addEventListener('pointerdown', (e) => {
+            if(appState !== 'book') return;
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(pages.map(p => p.mesh));
+            if(intersects.length > 0) {
+                let clickedPage = pages.find(p => p.mesh === intersects[0].object);
+                if(clickedPage) clickedPage.mesh.userData.flipped = !clickedPage.mesh.userData.flipped;
+            }
+        });
+
         function animate() {
             requestAnimationFrame(animate);
 
-            if(appState === 'map' && !isTransitioning) {
-                mapProgress += 0.0005; 
-                if(mapProgress >= 1) {
-                    mapProgress = 1;
-                    isTransitioning = true;
-                    cssContainer.style.opacity = 0;
-                    document.getElementById('drag-instruction').style.opacity = 0;
-                    
-                    const tl = gsap.timeline();
-                    tl.to("#transition-overlay", {opacity:1, duration:1});
-                    tl.call(()=>{
-                        scene.add(camera); camera.position.set(0,1,6); camera.rotation.set(0,0,0);
-                        mapGroup.visible=false; bookGroup.visible=true; particles.visible=true;
-                        scene.background.setHex(0x2a0510);
-                        appState='book';
-                        document.getElementById('instructions').style.display='block';
-                    }, null, 1);
-                    tl.to("#transition-overlay", {opacity:0, duration:1.5}, 1.5);
-                } else {
-                    const pos = routeCurve.getPoint(mapProgress);
-                    const next = routeCurve.getPoint(Math.min(mapProgress+0.01, 1));
-                    carGroup.position.copy(pos);
-                    carGroup.lookAt(next);
-                    
-                    const dir = new THREE.Vector3().subVectors(next, pos).normalize();
-                    wheel.rotation.z = dir.x * 2; 
-
-                    trafficCars.forEach((c, idx) => {
-                        const now = Date.now();
-                        if (now % 8000 > 6000) return; 
-
-                        c.userData.offset += c.userData.speed;
-                        if(c.userData.offset > 1) c.userData.offset = 0;
-                        const tPos = routeCurve.getPoint(1 - c.userData.offset); 
-                        c.position.set(tPos.x + 5, 0.5, tPos.z); 
-                        c.lookAt(routeCurve.getPoint(Math.max(0, 1 - c.userData.offset - 0.01)));
-                    });
+            if (appState === 'map') {
+                if (!isTransitioning) {
+                    mapProgress += 0.0015; 
+                    if (mapProgress >= 1) {
+                        mapProgress = 1;
+                        // TRIGGER THE COOL TRANSITION
+                        startBookTransition();
+                    } else {
+                        const currentPos = routeCurve.getPoint(mapProgress);
+                        car.position.copy(currentPos);
+                        car.lookAt(routeCurve.getPoint(Math.min(mapProgress + 0.01, 1)));
+                    }
                 }
             }
 
-            if(appState === 'book') {
-                const pAttr = particles.geometry.attributes.position;
-                for(let i=1; i<pAttr.array.length; i+=3) {
-                    pAttr.array[i] -= 0.05;
-                    if(pAttr.array[i] < -5) pAttr.array[i] = 10;
+            if (appState === 'book') {
+                const positions = heartParticles.geometry.attributes.position.array;
+                for(let i=1; i < particleCount * 3; i+=3) {
+                    positions[i] -= 0.02; 
+                    if(positions[i] < -5) {
+                        positions[i] = 15; 
+                    }
                 }
-                pAttr.needsUpdate = true;
-                
+                heartParticles.geometry.attributes.position.needsUpdate = true;
+
                 pages.forEach(p => {
-                    const t = p.mesh.userData.flipped ? -Math.PI*0.9 : 0;
-                    p.pivot.rotation.y += (t - p.pivot.rotation.y)*0.1;
+                    const targetRot = p.mesh.userData.flipped ? -Math.PI * 0.95 : 0;
+                    p.pivot.rotation.y += (targetRot - p.pivot.rotation.y) * 0.08;
                 });
             }
 
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
-        
+
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
+
         animate();
     </script>
 </body>
