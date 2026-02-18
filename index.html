@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For Jess - Our Journey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>For Jess - Happy Valentine's Day</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; touch-action: none; }
         #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
-        /* Map labels hidden initially */
         #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
         
         #ui-layer {
@@ -54,9 +53,9 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/",
-                "gsap": "https://unpkg.com/gsap@3.12.2/index.js"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+                "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm"
             }
         }
     </script>
@@ -85,7 +84,7 @@
         const cssContainer = document.getElementById('css2d-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87ceeb);
-        scene.fog = new THREE.Fog(0x87ceeb, 10, 60); // Hides the edge of the world
+        scene.fog = new THREE.Fog(0x87ceeb, 10, 60);
         
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 4.5, 7); 
@@ -103,27 +102,22 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         scene.add(ambientLight);
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(20, 40, 20);
         dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
         scene.add(dirLight);
 
         // --- SCENE 1: LIVING ROOM ---
         const roomGroup = new THREE.Group();
         scene.add(roomGroup);
 
-        // Floor
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x1da289 }));
         floor.rotation.x = -Math.PI / 2;
         floor.receiveShadow = true;
         roomGroup.add(floor);
 
-        // Walls
         const wallMat = new THREE.MeshStandardMaterial({ color: 0xff91af }); 
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
         backWall.position.set(0, 7.5, -8);
@@ -133,7 +127,6 @@
         const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
         rightWall.rotation.y = -Math.PI / 2; rightWall.position.set(12, 7.5, 0); roomGroup.add(rightWall);
 
-        // Furniture
         const rug = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 0.05, 32), new THREE.MeshStandardMaterial({ color: 0xc964af }));
         rug.scale.set(1, 1, 0.6); rug.position.set(0, 0.02, -1); roomGroup.add(rug);
 
@@ -153,7 +146,14 @@
         const tvBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
         tvBox.position.set(0, 3.1, -5.5); roomGroup.add(tvBox);
 
-        // Video Screen
+        const remoteGroup = new THREE.Group();
+        const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+        const remoteBtn = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.08), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        remoteBtn.position.set(0, 0.03, -0.2); 
+        remoteGroup.add(remoteBody, remoteBtn);
+        remoteGroup.position.set(0.5, 1.02, -1.5); 
+        roomGroup.add(remoteGroup);
+
         const flickerCanvas = document.createElement('canvas');
         flickerCanvas.width = 256; flickerCanvas.height = 512;
         const flickerCtx = flickerCanvas.getContext('2d');
@@ -172,7 +172,6 @@
         mapGroup.visible = false;
         scene.add(mapGroup);
 
-        // Infinite Grass Floor
         const grassGeo = new THREE.PlaneGeometry(300, 300);
         const grassMat = new THREE.MeshStandardMaterial({ color: 0x3b5e2b });
         const mapFloor = new THREE.Mesh(grassGeo, grassMat);
@@ -180,7 +179,6 @@
         mapFloor.receiveShadow = true;
         mapGroup.add(mapFloor);
 
-        // The Road Curve
         const routePoints = [
             new THREE.Vector3(-40, 0.2, -40),
             new THREE.Vector3(-10, 0.2, -10),
@@ -190,7 +188,6 @@
         ];
         const routeCurve = new THREE.CatmullRomCurve3(routePoints);
         
-        // Road Mesh
         const roadGeo = new THREE.TubeGeometry(routeCurve, 100, 3, 8, false);
         const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
         const road = new THREE.Mesh(roadGeo, roadMat);
@@ -199,7 +196,6 @@
         road.receiveShadow = true;
         mapGroup.add(road);
 
-        // --- CITY LIFE (Buildings, Trees, People) ---
         const cityLifeGroup = new THREE.Group();
         mapGroup.add(cityLifeGroup);
 
@@ -211,25 +207,21 @@
         for(let i=0; i<150; i++) {
             const x = (Math.random() - 0.5) * 120;
             const z = (Math.random() - 0.5) * 120;
-            
-            // Don't spawn on the road
             if(Math.abs(x - z) > 10) {
                 const type = Math.random();
-                
-                if(type > 0.6) { // Building
+                if(type > 0.6) { 
                     const h = Math.random() * 15 + 5;
                     const b = new THREE.Mesh(new THREE.BoxGeometry(3, h, 3), buildingMat);
                     b.position.set(x, h/2, z);
-                    b.castShadow = true;
                     cityLifeGroup.add(b);
-                } else if (type > 0.3) { // Tree
+                } else if (type > 0.3) { 
                     const t = new THREE.Group();
                     const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2), trunkMat); tr.position.y = 1;
                     const l = new THREE.Mesh(new THREE.ConeGeometry(2, 4, 8), treeMat); l.position.y = 3;
                     t.add(tr, l);
                     t.position.set(x, 0, z);
                     cityLifeGroup.add(t);
-                } else { // Person
+                } else { 
                     const p = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1, 4), personMat);
                     p.position.set(x, 0.8, z);
                     cityLifeGroup.add(p);
@@ -237,18 +229,16 @@
             }
         }
 
-        // Sellers/Stalls
         const stallColors = [0xff0000, 0x0000ff, 0xffff00];
         for(let i=0; i<6; i++) {
             const stall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({ color: stallColors[i%3] }));
-            stall.position.set(-20 + i*8, 1, -25 + i*8); // Along the road
+            stall.position.set(-20 + i*8, 1, -25 + i*8); 
             cityLifeGroup.add(stall);
         }
 
-        // --- MOVING TRAFFIC ---
         const trafficCars = [];
         const trafficGeo = new THREE.BoxGeometry(2, 1, 4);
-        const trafficMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); // White cars
+        const trafficMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); 
         
         for(let i=0; i<5; i++) {
             const tCar = new THREE.Mesh(trafficGeo, trafficMat);
@@ -258,59 +248,43 @@
             trafficCars.push(tCar);
         }
 
-        // --- THE HERO CAR (First Person Setup) ---
         const carGroup = new THREE.Group();
         mapGroup.add(carGroup);
 
-        // Car Body (Invisible from inside usually, but casts shadow)
         const carBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 5), new THREE.MeshStandardMaterial({ color: 0x222222, visible: false }));
         carBody.position.y = 0.75;
         carGroup.add(carBody);
 
-        // INTERIOR: Dashboard
         const dashboard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
         dashboard.position.set(0, 0.8, -0.8);
         carGroup.add(dashboard);
 
-        // INTERIOR: Windshield Pillars (A-Pillars)
-        const pillarL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-        pillarL.position.set(-1.1, 1.5, -0.8); pillarL.rotation.x = -0.3; pillarL.rotation.z = -0.2;
-        carGroup.add(pillarL);
-        const pillarR = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-        pillarR.position.set(1.1, 1.5, -0.8); pillarR.rotation.x = -0.3; pillarR.rotation.z = 0.2;
-        carGroup.add(pillarR);
-
-        // INTERIOR: Steering Wheel (Right side - Botswana)
         const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: 0x000000 }));
         wheel.position.set(0.6, 1.1, -0.4);
         wheel.rotation.x = -0.5;
         carGroup.add(wheel);
 
-        // PASSENGER: Jess (Left side)
         const jessGroup = new THREE.Group();
-        const jBody = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({ color: 0xff69b4 })); // Pink top
+        const jBody = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({ color: 0xff69b4 })); 
         jBody.position.y = 0.4;
-        const jHead = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8d5524 })); // Skin tone
+        const jHead = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8d5524 })); 
         jHead.position.y = 1.0;
-        const jHair = new THREE.Mesh(new THREE.SphereGeometry(0.28), new THREE.MeshStandardMaterial({ color: 0x000000 })); // Hair
+        const jHair = new THREE.Mesh(new THREE.SphereGeometry(0.28), new THREE.MeshStandardMaterial({ color: 0x000000 })); 
         jHair.position.y = 1.05; jHair.scale.y = 0.8;
         jessGroup.add(jBody, jHead, jHair);
-        jessGroup.position.set(-0.6, 0.2, 0.2); // Left seat
+        jessGroup.position.set(-0.6, 0.2, 0.2); 
         carGroup.add(jessGroup);
 
-        // Camera Pivot (Driver's Head Position)
         const cameraPivot = new THREE.Group();
-        cameraPivot.position.set(0.6, 1.4, 0.3); // Driver seat, head height
+        cameraPivot.position.set(0.6, 1.4, 0.3); 
         carGroup.add(cameraPivot);
 
-        // --- INPUT HANDLING ---
         let isDragging = false;
         let prevX = 0, prevY = 0;
         let camYaw = 0, camPitch = 0;
 
         window.addEventListener('pointerdown', e => {
             isDragging = true; prevX = e.clientX; prevY = e.clientY;
-            // Page turning logic for book
             if(appState === 'book') {
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -325,7 +299,6 @@
                 const dy = e.clientY - prevY;
                 camYaw -= dx * 0.005;
                 camPitch -= dy * 0.005;
-                // Limit head movement
                 camPitch = Math.max(-0.5, Math.min(0.5, camPitch));
                 camYaw = Math.max(-1.5, Math.min(1.5, camYaw));
                 cameraPivot.rotation.set(camPitch, camYaw, 0);
@@ -334,14 +307,10 @@
         });
         window.addEventListener('pointerup', () => isDragging = false);
 
-
-        // --- SCENE 4: BOOK & PARTICLES ---
-        // (Keeping your previous working book & particle code logic)
         const bookGroup = new THREE.Group();
         bookGroup.visible = false;
         scene.add(bookGroup);
-        // ... (Book generation logic remains same as previous working version for safety) ...
-        // Re-creating book textures quickly:
+        
         const pages = [];
         const bookChapters = [
             {t:"", b:""}, 
@@ -375,21 +344,18 @@
         const backCover = new THREE.Mesh(new THREE.BoxGeometry(3.2,4.2,0.05), new THREE.MeshStandardMaterial({color:0x5a0000}));
         backCover.position.z = -0.1; bookGroup.add(backCover);
 
-        // Particles
         const partGeo = new THREE.BufferGeometry();
-        const pPos = new Float32Array(450); // 150 particles * 3
+        const pPos = new Float32Array(450); 
         const pCol = new Float32Array(450);
         for(let i=0;i<150;i++){
             pPos[i*3]=(Math.random()-0.5)*20; pPos[i*3+1]=Math.random()*10; pPos[i*3+2]=(Math.random()-0.5)*10;
-            pCol[i*3]=1; pCol[i*3+1]=0; pCol[i*3+2]=0; // Red
+            pCol[i*3]=1; pCol[i*3+1]=0; pCol[i*3+2]=0; 
         }
         partGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
         partGeo.setAttribute('color', new THREE.BufferAttribute(pCol,3));
         const particles = new THREE.Points(partGeo, new THREE.PointsMaterial({size:0.5, vertexColors:true}));
         particles.visible = false; scene.add(particles);
 
-
-        // --- LOGIC ---
         let appState = 'room';
         let mapProgress = 0;
         let isTransitioning = false;
@@ -429,7 +395,6 @@
                     cssContainer.style.opacity = 1;
                     document.getElementById('drag-instruction').style.opacity = 1;
                     
-                    // Attach camera to driver's head
                     cameraPivot.add(camera);
                     camera.position.set(0,0,0);
                     camera.rotation.set(0,0,0);
@@ -443,18 +408,16 @@
             requestAnimationFrame(animate);
 
             if(appState === 'map' && !isTransitioning) {
-                mapProgress += 0.0005; // Driving speed
+                mapProgress += 0.0005; 
                 if(mapProgress >= 1) {
                     mapProgress = 1;
                     isTransitioning = true;
-                    // End transition logic
                     cssContainer.style.opacity = 0;
                     document.getElementById('drag-instruction').style.opacity = 0;
                     
                     const tl = gsap.timeline();
                     tl.to("#transition-overlay", {opacity:1, duration:1});
                     tl.call(()=>{
-                        // Detach camera
                         scene.add(camera); camera.position.set(0,1,6); camera.rotation.set(0,0,0);
                         mapGroup.visible=false; bookGroup.visible=true; particles.visible=true;
                         scene.background.setHex(0x2a0510);
@@ -468,21 +431,17 @@
                     carGroup.position.copy(pos);
                     carGroup.lookAt(next);
                     
-                    // Steer wheel
                     const dir = new THREE.Vector3().subVectors(next, pos).normalize();
                     wheel.rotation.z = dir.x * 2; 
 
-                    // Move Traffic
                     trafficCars.forEach((c, idx) => {
-                        // Stop light logic: stop every 5 seconds
                         const now = Date.now();
-                        if (now % 8000 > 6000) return; // Stop
+                        if (now % 8000 > 6000) return; 
 
                         c.userData.offset += c.userData.speed;
                         if(c.userData.offset > 1) c.userData.offset = 0;
-                        // Traffic moves on a slightly different curve (offset)
-                        const tPos = routeCurve.getPoint(1 - c.userData.offset); // Opposite direction
-                        c.position.set(tPos.x + 5, 0.5, tPos.z); // Offset lane
+                        const tPos = routeCurve.getPoint(1 - c.userData.offset); 
+                        c.position.set(tPos.x + 5, 0.5, tPos.z); 
                         c.lookAt(routeCurve.getPoint(Math.max(0, 1 - c.userData.offset - 0.01)));
                     });
                 }
