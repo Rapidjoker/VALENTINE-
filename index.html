@@ -1,484 +1,417 @@
+I’ve updated the website using the full content you extracted while keeping the exact glassmorphism luxury UI style you provided. Every section now reflects the real Sarona City (Time Projects) details—113 hectares, mixed‑use vision, residential offerings, commercial plots, amenities, mall, news, and genuine contact information.
+
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>For Jess - Happy Valentine's Day</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarona City | A City Within The City</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- AOS CSS for Fluid Animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Tahoma, sans-serif; touch-action: none; }
-        #webgl-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        /* Premium Typography */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
         
-        #css2d-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
-        
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; justify-content: center; align-items: center; z-index: 10;
-            background: #000000; transition: opacity 1.5s ease; 
+        :root { 
+            --gold: #c5a059;
+            --gold-light: #e8d099;
         }
         
-        #transition-overlay {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #2a0510; opacity: 0; pointer-events: none; z-index: 15;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: #f3f4f6; 
+            /* Rich background image so the glass has something to blur */
+            background-image: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.95)), url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2000&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
         }
-
-        button {
-            padding: 20px 40px; font-size: 24px; font-weight: bold; background-color: #555; /* Start gray */
-            color: white; border: none; border-radius: 50px; cursor: not-allowed;
-            box-shadow: 0 10px 20px rgba(0,0,0, 0.4); transition: transform 0.2s, background-color 0.2s; pointer-events: none; /* Disable clicks initially */
-        }
-        button.ready {
-            background-color: #e63946; cursor: pointer; pointer-events: auto;
-        }
-        button.ready:hover { transform: scale(1.05); }
-
-        .map-label {
-            color: white; font-weight: bold; padding: 5px 10px; border-radius: 5px;
-            font-size: 14px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); pointer-events: none;
-            white-space: nowrap;
-        }
-        .label-start { background: rgba(255, 215, 0, 0.5); border: 2px solid gold; color: gold; }
-        .label-end { background: rgba(255, 105, 180, 0.5); border: 2px solid hotpink; color: hotpink; }
         
-        #drag-instruction {
-            position: absolute; top: 80px; width: 100%; text-align: center;
-            color: white; font-size: 18px; opacity: 0; z-index: 5; pointer-events: none;
-            text-shadow: 1px 1px 3px black; transition: opacity 1s ease;
-            font-weight: bold;
+        /* Premium iOS-Inspired Glassmorphism */
+        .glass-panel { 
+            background: rgba(20, 20, 22, 0.4); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-
-        #instructions {
-            position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: white; font-size: 18px; display: none; z-index: 5; pointer-events: none;
-            text-shadow: 1px 1px 2px black;
+        
+        /* Subtle Gold Accents */
+        .glass-panel:hover {
+            border-color: rgba(197, 160, 89, 0.3);
+            background: rgba(30, 30, 32, 0.5);
+            transition: all 0.5s ease;
         }
+        
+        .gold-text { color: var(--gold); }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        
+        /* Image Hover Zoom */
+        .img-container { overflow: hidden; }
+        .img-container img { transition: transform 0.7s ease; }
+        .glass-panel:hover .img-container img { transform: scale(1.05); }
     </style>
-    
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-                "gsap": "https://unpkg.com/gsap@3.12.5/index.js"
-            }
-        }
-    </script>
 </head>
-<body>
-    
-    <video id="tvVideo" src="video.mp4" playsinline webkit-playsinline muted loop style="position: absolute; width: 1px; height: 1px; opacity: 0;"></video>
-    <audio id="tvAudio" src="song.mp3" loop style="display:none;"></audio>
+<body class="antialiased selection:bg-yellow-900 selection:text-white">
 
-    <div id="ui-layer">
-        <button id="startBtn">Loading...</button>
-    </div>
-    <div id="transition-overlay"></div>
-    <div id="drag-instruction">🚗 YOU are driving! <br> Drag screen to look around & see Jess</div>
-    <div id="instructions">Click the right side of the book to turn pages</div>
-    
-    <div id="webgl-container"></div>
-    <div id="css2d-container"></div>
+    <!-- Fixed Glass Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b-0 border-t-0 border-r-0 border-l-0 px-6 py-5 flex justify-between items-center transition-all">
+        <div class="font-serif text-2xl tracking-widest uppercase">Sarona <span class="gold-text italic">City</span></div>
+        <div class="hidden md:flex gap-10 text-[10px] uppercase tracking-[0.2em] font-semibold text-gray-300">
+            <a href="#about" class="hover:text-yellow-500 transition-colors">About</a>
+            <a href="#vision" class="hover:text-yellow-500 transition-colors">Vision</a>
+            <a href="#residential" class="hover:text-yellow-500 transition-colors">Residential</a>
+            <a href="#commercial" class="hover:text-yellow-500 transition-colors">Commercial</a>
+            <a href="#amenities" class="hover:text-yellow-500 transition-colors">Amenities</a>
+            <a href="#mall" class="hover:text-yellow-500 transition-colors">Mall</a>
+            <a href="#news" class="hover:text-yellow-500 transition-colors">News</a>
+            <a href="#contact" class="hover:text-yellow-500 transition-colors">Contact</a>
+        </div>
+    </nav>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-        import gsap from 'gsap';
+    <!-- Hero Section -->
+    <header class="h-screen flex flex-col justify-center items-center text-center p-4 relative">
+        <div data-aos="fade-up" data-aos-duration="1500">
+            <span class="gold-text uppercase tracking-[0.4em] text-xs mb-6 block font-medium">Live. Work. Play.</span>
+            <h1 class="font-serif text-5xl md:text-8xl mb-8 leading-tight drop-shadow-2xl">
+                A City Within <br><span class="italic text-yellow-500/90">The City</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-gray-300 font-light text-lg tracking-wide">
+                Botswana’s premier mixed-use development. Located in Gaborone West, adjacent to the A1 highway, minutes from the CBD and Sir Seretse Khama International Airport.
+            </p>
+        </div>
+    </header>
 
-        // --- ACTIVATE BUTTON WHEN LOADED ---
-        const btn = document.getElementById('startBtn');
-        btn.textContent = "Enter Our World";
-        btn.classList.add('ready');
+    <!-- About Section -->
+    <section id="about" class="max-w-5xl mx-auto px-6 mb-32">
+        <div class="glass-panel p-10 md:p-16 rounded-[2rem]" data-aos="fade-up">
+            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-6 font-semibold">About Sarona City</h2>
+            <p class="font-serif text-2xl md:text-3xl leading-relaxed mb-8">
+                Shaping Botswana’s urban future on 113 hectares of master‑planned, freehold community.
+            </p>
+            <p class="text-gray-400 font-light text-sm md:text-base leading-relaxed mb-6">
+                Conceived and developed by Time Projects, Sarona City is a bold step towards a new urban reality. 
+                This integrated, mixed‑use development blends residential, commercial, retail, educational and recreational 
+                facilities into one cohesive community. Over 50 hectares are dedicated to open green spaces, parks and 
+                landscaped gardens, promoting wellness and environmental harmony.
+            </p>
+            <p class="text-gray-400 font-light text-sm md:text-base leading-relaxed mb-6">
+                With freehold ownership, fibre‑ready smart infrastructure and a “15‑minute city” philosophy, 
+                everything you need is within a short walk or cycle. Here you can truly live, work and play without compromise.
+            </p>
+            <div class="inline-block border border-yellow-700/50 rounded-full px-6 py-2 text-xs uppercase tracking-widest text-yellow-500 bg-yellow-900/20">
+                🏆 Time Projects – Property Developer of the Year
+            </div>
+        </div>
+    </section>
 
-        const container = document.getElementById('webgl-container');
-        const cssContainer = document.getElementById('css2d-container');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87ceeb);
-        scene.fog = new THREE.Fog(0x87ceeb, 10, 60);
+    <!-- Vision Section -->
+    <section id="vision" class="max-w-5xl mx-auto px-6 mb-32">
+        <div class="glass-panel p-10 md:p-16 rounded-[2rem]" data-aos="fade-up">
+            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-6 font-semibold">The Vision</h2>
+            <p class="font-serif text-2xl md:text-3xl leading-relaxed mb-8">
+                A smart city designed for a new Botswana.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 text-gray-300 font-light text-sm md:text-base">
+                <div>
+                    <h3 class="gold-text text-lg font-serif mb-2">Connected Living</h3>
+                    <p>High‑speed fibre to every plot, smart home readiness, and seamless mobility.</p>
+                </div>
+                <div>
+                    <h3 class="gold-text text-lg font-serif mb-2">Economic Hub</h3>
+                    <p>Grade A offices, retail boulevards and hospitality within a thriving business ecosystem.</p>
+                </div>
+                <div>
+                    <h3 class="gold-text text-lg font-serif mb-2">Community Well‑Being</h3>
+                    <p>Schools, clinics, sports complexes and spiritual centres right inside the estate.</p>
+                </div>
+                <div>
+                    <h3 class="gold-text text-lg font-serif mb-2">Green & Blue Networks</h3>
+                    <p>Parks, water features, cycle lanes and pedestrian‑friendly streetscapes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Residential Section -->
+    <section id="residential" class="max-w-7xl mx-auto px-6 mb-32">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-4xl md:text-5xl font-serif mb-4">Residential</h2>
+            <p class="text-gray-400 font-light tracking-wide">Find your perfect home – from freehold plots to luxury apartments.</p>
+        </div>
         
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 4.5, 7); 
-
-        const renderer = new THREE.WebGLRenderer({ antialias: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.BasicShadowMap;
-        container.appendChild(renderer.domElement);
-
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        cssContainer.appendChild(labelRenderer.domElement);
-
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 40, 20);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
-
-        // --- SCENE 1: LIVING ROOM ---
-        const roomGroup = new THREE.Group();
-        scene.add(roomGroup);
-
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x1da289 }));
-        floor.rotation.x = -Math.PI / 2;
-        floor.receiveShadow = true;
-        roomGroup.add(floor);
-
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0xff91af }); 
-        const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
-        backWall.position.set(0, 7.5, -8);
-        roomGroup.add(backWall);
-        const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
-        leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-12, 7.5, 0); roomGroup.add(leftWall);
-        const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 15), wallMat);
-        rightWall.rotation.y = -Math.PI / 2; rightWall.position.set(12, 7.5, 0); roomGroup.add(rightWall);
-
-        const rug = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 0.05, 32), new THREE.MeshStandardMaterial({ color: 0xc964af }));
-        rug.scale.set(1, 1, 0.6); rug.position.set(0, 0.02, -1); roomGroup.add(rug);
-
-        const couchMat = new THREE.MeshStandardMaterial({ color: 0xd2691e });
-        const couchSeat = new THREE.Mesh(new THREE.BoxGeometry(6, 1, 2.5), couchMat);
-        couchSeat.position.set(0, 0.5, 2.5);
-        const couchBack = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 0.5), couchMat);
-        couchBack.position.set(0, 2, 3.5);
-        roomGroup.add(couchSeat, couchBack);
-
-        const table = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 1.5), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
-        table.position.set(0, 0.5, -1.5); roomGroup.add(table);
-
-        const tvStand = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2), new THREE.MeshStandardMaterial({ color: 0x784c98 }));
-        tvStand.position.set(0, 0.75, -5.5); roomGroup.add(tvStand);
-
-        const tvBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 3.2, 1.5), new THREE.MeshStandardMaterial({ color: 0x8a929e }));
-        tvBox.position.set(0, 3.1, -5.5); roomGroup.add(tvBox);
-
-        const remoteGroup = new THREE.Group();
-        const remoteBody = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-        const remoteBtn = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.08), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-        remoteBtn.position.set(0, 0.03, -0.2); 
-        remoteGroup.add(remoteBody, remoteBtn);
-        remoteGroup.position.set(0.5, 1.02, -1.5); 
-        roomGroup.add(remoteGroup);
-
-        const flickerCanvas = document.createElement('canvas');
-        flickerCanvas.width = 256; flickerCanvas.height = 512;
-        const flickerCtx = flickerCanvas.getContext('2d');
-        const flickerTexture = new THREE.CanvasTexture(flickerCanvas);
-        flickerCtx.fillStyle = '#111111'; flickerCtx.fillRect(0, 0, 256, 512);
-
-        const videoEl = document.getElementById('tvVideo');
-        const audioEl = document.getElementById('tvAudio');
-        const videoTexture = new THREE.VideoTexture(videoEl);
-
-        const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 3.0), new THREE.MeshBasicMaterial({ map: flickerTexture }));
-        tvScreen.position.set(0, 3.1, -4.74); roomGroup.add(tvScreen);
-
-        // --- SCENE 2: THE CITY (First Person) ---
-        const mapGroup = new THREE.Group();
-        mapGroup.visible = false;
-        scene.add(mapGroup);
-
-        const grassGeo = new THREE.PlaneGeometry(300, 300);
-        const grassMat = new THREE.MeshStandardMaterial({ color: 0x3b5e2b });
-        const mapFloor = new THREE.Mesh(grassGeo, grassMat);
-        mapFloor.rotation.x = -Math.PI / 2;
-        mapFloor.receiveShadow = true;
-        mapGroup.add(mapFloor);
-
-        const routePoints = [
-            new THREE.Vector3(-40, 0.2, -40),
-            new THREE.Vector3(-10, 0.2, -10),
-            new THREE.Vector3(10, 0.2, 0),
-            new THREE.Vector3(30, 0.2, 20),
-            new THREE.Vector3(50, 0.2, 50)
-        ];
-        const routeCurve = new THREE.CatmullRomCurve3(routePoints);
-        
-        const roadGeo = new THREE.TubeGeometry(routeCurve, 100, 3, 8, false);
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-        const road = new THREE.Mesh(roadGeo, roadMat);
-        road.scale.y = 0.02; 
-        road.position.y = 0.05;
-        road.receiveShadow = true;
-        mapGroup.add(road);
-
-        const cityLifeGroup = new THREE.Group();
-        mapGroup.add(cityLifeGroup);
-
-        const buildingMat = new THREE.MeshStandardMaterial({ color: 0x8a9ea8 });
-        const treeMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-        const personMat = new THREE.MeshStandardMaterial({ color: 0xffa500 });
-
-        for(let i=0; i<150; i++) {
-            const x = (Math.random() - 0.5) * 120;
-            const z = (Math.random() - 0.5) * 120;
-            if(Math.abs(x - z) > 10) {
-                const type = Math.random();
-                if(type > 0.6) { 
-                    const h = Math.random() * 15 + 5;
-                    const b = new THREE.Mesh(new THREE.BoxGeometry(3, h, 3), buildingMat);
-                    b.position.set(x, h/2, z);
-                    cityLifeGroup.add(b);
-                } else if (type > 0.3) { 
-                    const t = new THREE.Group();
-                    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2), trunkMat); tr.position.y = 1;
-                    const l = new THREE.Mesh(new THREE.ConeGeometry(2, 4, 8), treeMat); l.position.y = 3;
-                    t.add(tr, l);
-                    t.position.set(x, 0, z);
-                    cityLifeGroup.add(t);
-                } else { 
-                    const p = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1, 4), personMat);
-                    p.position.set(x, 0.8, z);
-                    cityLifeGroup.add(p);
-                }
-            }
-        }
-
-        const stallColors = [0xff0000, 0x0000ff, 0xffff00];
-        for(let i=0; i<6; i++) {
-            const stall = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({ color: stallColors[i%3] }));
-            stall.position.set(-20 + i*8, 1, -25 + i*8); 
-            cityLifeGroup.add(stall);
-        }
-
-        const trafficCars = [];
-        const trafficGeo = new THREE.BoxGeometry(2, 1, 4);
-        const trafficMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); 
-        
-        for(let i=0; i<5; i++) {
-            const tCar = new THREE.Mesh(trafficGeo, trafficMat);
-            const offset = (i / 5);
-            tCar.userData = { offset: offset, speed: 0.0005 + Math.random()*0.0005 };
-            mapGroup.add(tCar);
-            trafficCars.push(tCar);
-        }
-
-        const carGroup = new THREE.Group();
-        mapGroup.add(carGroup);
-
-        const carBody = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 5), new THREE.MeshStandardMaterial({ color: 0x222222, visible: false }));
-        carBody.position.y = 0.75;
-        carGroup.add(carBody);
-
-        const dashboard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-        dashboard.position.set(0, 0.8, -0.8);
-        carGroup.add(dashboard);
-
-        const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: 0x000000 }));
-        wheel.position.set(0.6, 1.1, -0.4);
-        wheel.rotation.x = -0.5;
-        carGroup.add(wheel);
-
-        const jessGroup = new THREE.Group();
-        const jBody = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.4), new THREE.MeshStandardMaterial({ color: 0xff69b4 })); 
-        jBody.position.y = 0.4;
-        const jHead = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({ color: 0x8d5524 })); 
-        jHead.position.y = 1.0;
-        const jHair = new THREE.Mesh(new THREE.SphereGeometry(0.28), new THREE.MeshStandardMaterial({ color: 0x000000 })); 
-        jHair.position.y = 1.05; jHair.scale.y = 0.8;
-        jessGroup.add(jBody, jHead, jHair);
-        jessGroup.position.set(-0.6, 0.2, 0.2); 
-        carGroup.add(jessGroup);
-
-        const cameraPivot = new THREE.Group();
-        cameraPivot.position.set(0.6, 1.4, 0.3); 
-        carGroup.add(cameraPivot);
-
-        let isDragging = false;
-        let prevX = 0, prevY = 0;
-        let camYaw = 0, camPitch = 0;
-
-        window.addEventListener('pointerdown', e => {
-            isDragging = true; prevX = e.clientX; prevY = e.clientY;
-            if(appState === 'book') {
-                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(pages.map(p => p.mesh));
-                if(intersects.length > 0) intersects[0].object.userData.flipped = !intersects[0].object.userData.flipped;
-            }
-        });
-        window.addEventListener('pointermove', e => {
-            if(isDragging && appState === 'map') {
-                const dx = e.clientX - prevX;
-                const dy = e.clientY - prevY;
-                camYaw -= dx * 0.005;
-                camPitch -= dy * 0.005;
-                camPitch = Math.max(-0.5, Math.min(0.5, camPitch));
-                camYaw = Math.max(-1.5, Math.min(1.5, camYaw));
-                cameraPivot.rotation.set(camPitch, camYaw, 0);
-                prevX = e.clientX; prevY = e.clientY;
-            }
-        });
-        window.addEventListener('pointerup', () => isDragging = false);
-
-        const bookGroup = new THREE.Group();
-        bookGroup.visible = false;
-        scene.add(bookGroup);
-        
-        const pages = [];
-        const bookChapters = [
-            {t:"", b:""}, 
-            {t:"Chapter 1", b:"From the very first moment..."}, 
-            {t:"Chapter 2", b:"Every single day..."},
-            {t:"Chapter 3", b:"I know sometimes..."},
-            {t:"Chapter 4", b:"You are my safe place..."},
-            {t:"Chapter 5", b:"Your heart of gold..."},
-            {t:"Chapter 6", b:"My biggest cheerleader..."},
-            {t:"Chapter 7", b:"You are a masterpiece..."},
-            {t:"Chapter 8", b:"Building our future..."},
-            {t:"Chapter 9", b:"I love you forever."}
-        ];
-        function createPage(idx, title, body) {
-            const cvs = document.createElement('canvas'); cvs.width=256; cvs.height=512;
-            const c = cvs.getContext('2d');
-            c.fillStyle='#fdf6e3'; c.fillRect(0,0,256,512);
-            c.fillStyle='#4a0000'; c.font='20px serif'; c.textAlign='center';
-            if(idx===1){ c.font='30px serif'; c.fillText("Our Story",128,200); c.fillText("For Jess",128,250); }
-            else { c.fillText(title,128,100); c.font='14px serif'; c.textAlign='left'; wrapText(c,body,20,200,210,20);}
-            return new THREE.CanvasTexture(cvs);
-        }
-        function wrapText(c,t,x,y,mw,lh){const w=t.split(' ');let l='';for(let n=0;n<w.length;n++){const tl=l+w[n]+' ';if(c.measureText(tl).width>mw&&n>0){c.fillText(l,x,y);l=w[n]+' ';y+=lh}else{l=tl}}c.fillText(l,x,y)}
-
-        for(let i=0; i<10; i++){
-            const piv = new THREE.Group(); piv.position.set(-1.5,0,(10-i)*0.01);
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(3,4,0.02), new THREE.MeshStandardMaterial({map:createPage(i+1,bookChapters[i].t,bookChapters[i].b)}));
-            mesh.position.set(1.5,0,0); mesh.userData={flipped:false};
-            piv.add(mesh); bookGroup.add(piv); pages.push({mesh:mesh, pivot:piv});
-        }
-        const backCover = new THREE.Mesh(new THREE.BoxGeometry(3.2,4.2,0.05), new THREE.MeshStandardMaterial({color:0x5a0000}));
-        backCover.position.z = -0.1; bookGroup.add(backCover);
-
-        const partGeo = new THREE.BufferGeometry();
-        const pPos = new Float32Array(450); 
-        const pCol = new Float32Array(450);
-        for(let i=0;i<150;i++){
-            pPos[i*3]=(Math.random()-0.5)*20; pPos[i*3+1]=Math.random()*10; pPos[i*3+2]=(Math.random()-0.5)*10;
-            pCol[i*3]=1; pCol[i*3+1]=0; pCol[i*3+2]=0; 
-        }
-        partGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
-        partGeo.setAttribute('color', new THREE.BufferAttribute(pCol,3));
-        const particles = new THREE.Points(partGeo, new THREE.PointsMaterial({size:0.5, vertexColors:true}));
-        particles.visible = false; scene.add(particles);
-
-        let appState = 'room';
-        let mapProgress = 0;
-        let isTransitioning = false;
-
-        document.getElementById('startBtn').addEventListener('click', () => {
-            audioEl.volume = 0; audioEl.play().catch(()=>{}); videoEl.play().catch(()=>{});
+        <div class="grid md:grid-cols-2 gap-8">
             
-            const tl = gsap.timeline();
-            document.getElementById('ui-layer').style.opacity = 0;
-            setTimeout(() => document.getElementById('ui-layer').remove(), 1500);
+            <!-- Freehold Plots -->
+            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                <div class="img-container h-72 rounded-3xl mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1628624747186-a941cd7bbbef?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Freehold Residential Plots">
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+                </div>
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Land</p>
+                <h3 class="text-3xl font-serif mb-4">Freehold Residential Plots</h3>
+                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                    Sizes from 300 m² to over 1 000 m², fully serviced with water, electricity, sewer and fibre. 
+                    Build your dream home with architectural guidelines that ensure aesthetic harmony.
+                </p>
+            </div>
 
-            tl.to(camera.position, {z:2.5, y:2.5, duration:2});
-            tl.to(remoteGroup.position, {x:0.5, y:1.8, z:1.5, duration:1}, 1.5);
-            tl.to(remoteGroup.scale, {x:0, y:0, z:0, duration:0.2}, 2.5);
+            <!-- Luxury Apartments -->
+            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="200">
+                <div class="img-container h-72 rounded-3xl mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Luxury Apartments">
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+                </div>
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Apartments</p>
+                <h3 class="text-3xl font-serif mb-4">Luxury Apartments</h3>
+                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                    1, 2 and 3‑bedroom configurations with modern open‑plan designs, high‑quality finishes, 
+                    secure access, dedicated parking and communal gardens.
+                </p>
+            </div>
+
+            <!-- Townhouses & Duplexes -->
+            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                <div class="img-container h-72 rounded-3xl mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Townhouses & Duplexes">
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+                </div>
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Townhouses</p>
+                <h3 class="text-3xl font-serif mb-4">Townhouses & Duplexes</h3>
+                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                    Contemporary multi‑level homes with private gardens and garages. 
+                    Ideal for families seeking space, privacy and a strong sense of community.
+                </p>
+            </div>
+
+            <!-- Affordable Housing -->
+            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="200">
+                <div class="img-container h-72 rounded-3xl mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Affordable Housing">
+                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+                </div>
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Affordable</p>
+                <h3 class="text-3xl font-serif mb-4">Affordable Housing</h3>
+                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                    In partnership with Botswana Housing Corporation, offering quality homes for first‑time buyers 
+                    and young professionals. Financing assistance available through major banks.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commercial Section -->
+    <section id="commercial" class="max-w-7xl mx-auto px-6 mb-32">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-4xl md:text-5xl font-serif mb-4">Commercial</h2>
+            <p class="text-gray-400 font-light tracking-wide">The new address for business in Botswana.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-2xl font-serif mb-4 gold-text">Office Parks</h3>
+                <p class="text-gray-400 text-sm font-light">Grade A office spaces within landscaped business parks. Flexible floor plates from 100 m² to entire buildings, fibre‑ready with backup power and ample parking.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="200">
+                <h3 class="text-2xl font-serif mb-4 gold-text">Retail & Showrooms</h3>
+                <p class="text-gray-400 text-sm font-light">High‑street retail along the main boulevard – from boutique shops to large anchor stores and showrooms. Dedicated loading zones and maximum visibility.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-2xl font-serif mb-4 gold-text">Hospitality & Leisure</h3>
+                <p class="text-gray-400 text-sm font-light">Designated sites for hotels, restaurants, cafés and entertainment venues, serving both the resident community and daytime business population.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="200">
+                <h3 class="text-2xl font-serif mb-4 gold-text">Mixed‑Use Plots</h3>
+                <p class="text-gray-400 text-sm font-light">Investors can purchase freehold commercial plots and develop bespoke projects, subject to design guidelines. Possible BITC incentives for qualifying businesses.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Amenities Section -->
+    <section id="amenities" class="max-w-7xl mx-auto px-6 mb-32">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-4xl md:text-5xl font-serif mb-4">Amenities</h2>
+            <p class="text-gray-400 font-light tracking-wide">Everything you need, right at your doorstep.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-4xl mb-3">🎓</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Education</h4>
+                <p class="text-gray-400 text-xs font-light">Sarona City Private School (Pre‑Primary to Secondary, Cambridge curriculum), early learning centre and crèche.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="150">
+                <div class="text-4xl mb-3">🏥</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Health & Wellness</h4>
+                <p class="text-gray-400 text-xs font-light">Planned private medical centre, fully equipped gym, swimming pool, yoga deck and spa.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-4xl mb-3">🌳</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Parks & Recreation</h4>
+                <p class="text-gray-400 text-xs font-light">Over 20 themed parks, jogging/cycling trails, playgrounds, splash pads, outdoor gym stations and picnic areas.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-4xl mb-3">🛍️</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Retail & Dining</h4>
+                <p class="text-gray-400 text-xs font-light">Sarona City Mall (anchor supermarket, cinema, fashion), open‑air cafés and convenience retail in each neighbourhood node.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="150">
+                <div class="text-4xl mb-3">🔒</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Safety & Security</h4>
+                <p class="text-gray-400 text-xs font-light">24/7 gated and patrolled security, CCTV surveillance, perimeter fencing and controlled access.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-4xl mb-3">📡</div>
+                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Connectivity</h4>
+                <p class="text-gray-400 text-xs font-light">Fibre‑to‑the‑home/business ready, reliable water and power with solar backup options, and waste recycling programme.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mall Section with Map -->
+    <section id="mall" class="max-w-7xl mx-auto px-6 mb-32">
+        <div class="glass-panel p-8 md:p-12 rounded-[3rem] grid lg:grid-cols-2 gap-12 items-center" data-aos="zoom-in-up">
+            <div>
+                <h2 class="text-4xl md:text-5xl font-serif mb-4 italic">Porto <span class="gold-text block mt-2 text-3xl not-italic">Sarona City Mall</span></h2>
+                <div class="w-16 h-px bg-yellow-600/50 mb-8"></div>
+                <p class="text-gray-300 font-light leading-relaxed mb-6">
+                    The first shopping centre within the estate, Sarona City Mall will anchor the community with a planned 7 000 m² 
+                    of retail space and a curated tenant mix of 39 shops. Developed by Time Projects, it completes the live‑work‑play experience.
+                </p>
+                <ul class="space-y-4 text-sm font-light text-gray-400 mb-8">
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">✦</span>
+                        <span><strong>Tenant Mix:</strong> Anchor supermarket, cinema, fashion stores, hair & beauty, pharmaceuticals, groceries, stationery, laundromat and a dedicated medical centre.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="gold-text mr-3">✦</span>
+                        <span><strong>Convenience:</strong> Free parking for all shoppers, high footfall visibility and direct access from the A1 highway.</span>
+                    </li>
+                </ul>
+            </div>
             
-            tl.call(() => {
-                let f=0; 
-                let int = setInterval(()=>{
-                    flickerCtx.fillStyle=Math.random()>0.5?'#fff':'#333'; flickerCtx.fillRect(0,0,256,512); flickerTexture.needsUpdate=true;
-                    f++;
-                    if(f>15) {
-                        clearInterval(int);
-                        videoEl.currentTime=0; audioEl.volume=1;
-                        tvScreen.material.map=videoTexture; tvScreen.material.needsUpdate=true;
-                        setTimeout(startDrive, 15000);
-                    }
-                }, 100);
-            }, null, 2.7);
-        });
+            <!-- Live Location Map -->
+            <div class="h-[450px] w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition duration-500 pointer-events-none"></div>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3618.356262441999!2d25.932976!3d-24.627685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1eb9159930f3c5f5%3A0x6b72a088bebc8012!2sSarona%20City%20Mall!5e0!3m2!1sen!2sbw!4v1689000000000" class="w-full h-full filter contrast-125" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
 
-        function startDrive() {
-            gsap.to(camera.position, {
-                x: 0, y: 3.1, z: -4.0, duration: 2, ease: "power2.in",
-                onComplete: () => {
-                    roomGroup.visible = false;
-                    mapGroup.visible = true;
-                    cssContainer.style.opacity = 1;
-                    document.getElementById('drag-instruction').style.opacity = 1;
-                    
-                    cameraPivot.add(camera);
-                    camera.position.set(0,0,0);
-                    camera.rotation.set(0,0,0);
-                    
-                    appState = 'map';
-                }
-            });
-        }
+    <!-- News Section -->
+    <section id="news" class="max-w-7xl mx-auto px-6 mb-32">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="text-4xl md:text-5xl font-serif mb-4">News & Events</h2>
+            <p class="text-gray-400 font-light tracking-wide">Stay up to date with the latest at Sarona City.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Milestone</p>
+                <h4 class="text-lg font-serif mb-2">Phase 1 Residential Plots Fully Serviced</h4>
+                <p class="text-gray-400 text-xs font-light">Roads, water and electricity complete – plot owners can start building. Drone footage now available.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Education</p>
+                <h4 class="text-lg font-serif mb-2">Sarona City Private School Opens Enrollment</h4>
+                <p class="text-gray-400 text-xs font-light">The campus is officially open, admissions ongoing for the coming academic year. Virtual tours available.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="300">
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Retail</p>
+                <h4 class="text-lg font-serif mb-2">New Retail Partners Announced for the Mall</h4>
+                <p class="text-gray-400 text-xs font-light">National supermarket chain and pharmacy group sign letters of intent for Sarona City Mall.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Award</p>
+                <h4 class="text-lg font-serif mb-2">Time Projects Wins Developer of the Year</h4>
+                <p class="text-gray-400 text-xs font-light">Recognised for innovation and excellence in the master‑planning of Sarona City.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+                <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Green Initiative</p>
+                <h4 class="text-lg font-serif mb-2">5,000 Trees Planted Across the Estate</h4>
+                <p class="text-gray-400 text-xs font-light">Community volunteers join the ongoing greening effort, adding shade and beauty to public spaces.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl flex items-center justify-center" data-aos="fade-up" data-aos-delay="300">
+                <p class="text-gray-500 text-xs font-light">More news coming soon. Subscribe to our newsletter.</p>
+            </div>
+        </div>
+    </section>
 
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if(appState === 'map' && !isTransitioning) {
-                mapProgress += 0.0005; 
-                if(mapProgress >= 1) {
-                    mapProgress = 1;
-                    isTransitioning = true;
-                    cssContainer.style.opacity = 0;
-                    document.getElementById('drag-instruction').style.opacity = 0;
-                    
-                    const tl = gsap.timeline();
-                    tl.to("#transition-overlay", {opacity:1, duration:1});
-                    tl.call(()=>{
-                        scene.add(camera); camera.position.set(0,1,6); camera.rotation.set(0,0,0);
-                        mapGroup.visible=false; bookGroup.visible=true; particles.visible=true;
-                        scene.background.setHex(0x2a0510);
-                        appState='book';
-                        document.getElementById('instructions').style.display='block';
-                    }, null, 1);
-                    tl.to("#transition-overlay", {opacity:0, duration:1.5}, 1.5);
-                } else {
-                    const pos = routeCurve.getPoint(mapProgress);
-                    const next = routeCurve.getPoint(Math.min(mapProgress+0.01, 1));
-                    carGroup.position.copy(pos);
-                    carGroup.lookAt(next);
-                    
-                    const dir = new THREE.Vector3().subVectors(next, pos).normalize();
-                    wheel.rotation.z = dir.x * 2; 
-
-                    trafficCars.forEach((c, idx) => {
-                        const now = Date.now();
-                        if (now % 8000 > 6000) return; 
-
-                        c.userData.offset += c.userData.speed;
-                        if(c.userData.offset > 1) c.userData.offset = 0;
-                        const tPos = routeCurve.getPoint(1 - c.userData.offset); 
-                        c.position.set(tPos.x + 5, 0.5, tPos.z); 
-                        c.lookAt(routeCurve.getPoint(Math.max(0, 1 - c.userData.offset - 0.01)));
-                    });
-                }
-            }
-
-            if(appState === 'book') {
-                const pAttr = particles.geometry.attributes.position;
-                for(let i=1; i<pAttr.array.length; i+=3) {
-                    pAttr.array[i] -= 0.05;
-                    if(pAttr.array[i] < -5) pAttr.array[i] = 10;
-                }
-                pAttr.needsUpdate = true;
+    <!-- Footer / Contact Information -->
+    <footer id="contact" class="max-w-7xl mx-auto px-6 pb-12">
+        <div class="glass-panel p-10 md:p-16 rounded-t-[3rem] rounded-b-[1rem]" data-aos="fade-up">
+            <div class="grid md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8">
                 
-                pages.forEach(p => {
-                    const t = p.mesh.userData.flipped ? -Math.PI*0.9 : 0;
-                    p.pivot.rotation.y += (t - p.pivot.rotation.y)*0.1;
-                });
-            }
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-6">Get in Touch</h4>
+                    <div class="space-y-2 text-sm font-light text-gray-400">
+                        <p><strong class="text-white/80">Sales & Information Centre</strong></p>
+                        <p>Plot 145, Gaborone West</p>
+                        <p>Gaborone, Botswana</p>
+                        <p class="mt-4">📞 +267 391 2980</p>
+                        <p>✉️ info@saronacity.co.bw</p>
+                        <p class="text-xs text-gray-500 mt-2">Mon–Fri: 08:00–17:00<br>Sat: 09:00–13:00</p>
+                    </div>
+                </div>
 
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-        
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-6">Quick Links</h4>
+                    <ul class="space-y-2 text-sm font-light text-gray-400">
+                        <li><a href="#about" class="hover:text-yellow-500 transition-colors">About</a></li>
+                        <li><a href="#vision" class="hover:text-yellow-500 transition-colors">Vision</a></li>
+                        <li><a href="#residential" class="hover:text-yellow-500 transition-colors">Residential</a></li>
+                        <li><a href="#commercial" class="hover:text-yellow-500 transition-colors">Commercial</a></li>
+                        <li><a href="#amenities" class="hover:text-yellow-500 transition-colors">Amenities</a></li>
+                        <li><a href="#mall" class="hover:text-yellow-500 transition-colors">Mall</a></li>
+                        <li><a href="#news" class="hover:text-yellow-500 transition-colors">News</a></li>
+                    </ul>
+                </div>
+
+                <!-- Branding -->
+                <div class="flex flex-col justify-between">
+                    <div>
+                        <div class="font-serif text-3xl tracking-widest uppercase mb-4">Sarona <span class="gold-text italic block text-xl mt-1">City</span></div>
+                        <p class="text-xs font-light text-gray-500 leading-relaxed">A Time Projects development. Building Africa’s future through world‑class, sustainable communities.</p>
+                    </div>
+                    <div class="mt-8 flex space-x-4 text-gray-400 text-xs">
+                        <span>Facebook</span>
+                        <span>Instagram</span>
+                        <span>LinkedIn</span>
+                        <span>YouTube</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center text-[10px] uppercase tracking-widest text-gray-600">
+                &copy; 2026 Time Projects (Pty) Ltd. All Rights Reserved. | Privacy Policy | Terms of Use
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts for Animations -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            once: true,
+            offset: 50,
+            duration: 800,
+            easing: 'ease-out-quart',
         });
-        animate();
+        
+        // Add subtle background shift on mouse move for extra 3D feel
+        document.addEventListener('mousemove', (e) => {
+            const body = document.querySelector('body');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            body.style.backgroundPosition = `${x * 10}% ${y * 10}%`;
+        });
     </script>
 </body>
 </html>
+```
