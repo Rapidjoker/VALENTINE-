@@ -1,138 +1,262 @@
-I’ve updated the website using the full content you extracted while keeping the exact glassmorphism luxury UI style you provided. Every section now reflects the real Sarona City (Time Projects) details—113 hectares, mixed‑use vision, residential offerings, commercial plots, amenities, mall, news, and genuine contact information.
-
-```html
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sarona City | A City Within The City</title>
-    
-    <!-- Tailwind CSS -->
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- AOS CSS for Fluid Animations -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <style>
-        /* Premium Typography */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
-        
-        :root { 
-            --gold: #c5a059;
-            --gold-light: #e8d099;
+
+        :root {
+            --gold: #b8963f;
+            --gold-light: #d4af6a;
+            --sand: #f5f3ee;
         }
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            color: #f3f4f6; 
-            /* Rich background image so the glass has something to blur */
-            background-image: linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.95)), url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2000&q=80');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfaf7;
+            color: #1a1a1a;
+            background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=80');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
         }
-        
-        /* Premium iOS-Inspired Glassmorphism */
-        .glass-panel { 
-            background: rgba(20, 20, 22, 0.4); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+        /* Light glass with subtle texture */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(180, 160, 130, 0.25);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+            border-radius: 2.5rem;
         }
-        
-        /* Subtle Gold Accents */
+
         .glass-panel:hover {
-            border-color: rgba(197, 160, 89, 0.3);
-            background: rgba(30, 30, 32, 0.5);
+            border-color: rgba(184, 150, 63, 0.45);
+            background: rgba(255, 255, 255, 0.85);
             transition: all 0.5s ease;
         }
-        
+
         .gold-text { color: var(--gold); }
         .font-serif { font-family: 'Playfair Display', serif; }
+
+        .dark-accent {
+            background: rgba(30, 28, 25, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(200, 170, 110, 0.25);
+            color: #f3f4f6;
+        }
+
+        .dark-accent:hover {
+            background: rgba(20, 18, 15, 0.9);
+            border-color: rgba(212, 175, 106, 0.5);
+        }
+
+        .img-container { 
+            overflow: hidden; 
+            border-radius: 1.5rem; 
+        }
+        .img-container img { 
+            transition: transform 0.7s ease; 
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .glass-panel:hover .img-container img, 
+        .dark-accent:hover .img-container img { 
+            transform: scale(1.03); 
+        }
+
+        .badge {
+            background: rgba(184, 150, 63, 0.12);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(184, 150, 63, 0.3);
+            color: #7a621f;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+        }
+
+        .badge-dark {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e8d099;
+        }
+
+        /* Mobile navigation */
+        .mobile-menu {
+            display: none;
+        }
         
-        /* Image Hover Zoom */
-        .img-container { overflow: hidden; }
-        .img-container img { transition: transform 0.7s ease; }
-        .glass-panel:hover .img-container img { transform: scale(1.05); }
+        @media (max-width: 768px) {
+            .glass-panel {
+                border-radius: 1.5rem;
+                padding: 1.5rem;
+            }
+            
+            .dark-accent {
+                border-radius: 1.5rem;
+                padding: 1.5rem;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            h2 {
+                font-size: 2rem !important;
+            }
+            
+            .img-container {
+                height: 200px !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu {
+                display: none;
+            }
+            
+            .desktop-nav {
+                display: flex;
+            }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hamburger menu animation */
+        .hamburger-line {
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-open .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
     </style>
 </head>
-<body class="antialiased selection:bg-yellow-900 selection:text-white">
+<body class="antialiased">
 
-    <!-- Fixed Glass Navigation -->
-    <nav class="fixed w-full z-50 glass-panel border-b-0 border-t-0 border-r-0 border-l-0 px-6 py-5 flex justify-between items-center transition-all">
-        <div class="font-serif text-2xl tracking-widest uppercase">Sarona <span class="gold-text italic">City</span></div>
-        <div class="hidden md:flex gap-10 text-[10px] uppercase tracking-[0.2em] font-semibold text-gray-300">
-            <a href="#about" class="hover:text-yellow-500 transition-colors">About</a>
-            <a href="#vision" class="hover:text-yellow-500 transition-colors">Vision</a>
-            <a href="#residential" class="hover:text-yellow-500 transition-colors">Residential</a>
-            <a href="#commercial" class="hover:text-yellow-500 transition-colors">Commercial</a>
-            <a href="#amenities" class="hover:text-yellow-500 transition-colors">Amenities</a>
-            <a href="#mall" class="hover:text-yellow-500 transition-colors">Mall</a>
-            <a href="#news" class="hover:text-yellow-500 transition-colors">News</a>
-            <a href="#contact" class="hover:text-yellow-500 transition-colors">Contact</a>
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b-0 border-t-0 border-r-0 border-l-0 px-4 md:px-6 py-4 md:py-5 flex justify-between items-center transition-all">
+        <div class="font-serif text-xl md:text-2xl tracking-widest uppercase text-gray-800">Sarona <span class="gold-text italic">City</span></div>
+        
+        <!-- Desktop Navigation -->
+        <div class="desktop-nav gap-6 lg:gap-10 text-[10px] uppercase tracking-[0.2em] font-semibold text-gray-600">
+            <a href="#about" class="hover:text-yellow-700 transition-colors">About</a>
+            <a href="#vision" class="hover:text-yellow-700 transition-colors">Vision</a>
+            <a href="#residential" class="hover:text-yellow-700 transition-colors">Residential</a>
+            <a href="#commercial" class="hover:text-yellow-700 transition-colors">Commercial</a>
+            <a href="#amenities" class="hover:text-yellow-700 transition-colors">Amenities</a>
+            <a href="#mall" class="hover:text-yellow-700 transition-colors">Mall</a>
+            <a href="#news" class="hover:text-yellow-700 transition-colors">News</a>
+            <a href="#contact" class="hover:text-yellow-700 transition-colors">Contact</a>
         </div>
+
+        <!-- Mobile Hamburger -->
+        <button class="mobile-menu text-gray-800 p-2" onclick="toggleMobileMenu()">
+            <div class="hamburger-line w-6 h-0.5 bg-gray-800 mb-1.5"></div>
+            <div class="hamburger-line w-6 h-0.5 bg-gray-800 mb-1.5"></div>
+            <div class="hamburger-line w-6 h-0.5 bg-gray-800"></div>
+        </button>
     </nav>
 
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 glass-panel pt-20 hidden">
+        <div class="flex flex-col items-center gap-6 text-sm uppercase tracking-widest font-semibold text-gray-700">
+            <a href="#about" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">About</a>
+            <a href="#vision" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Vision</a>
+            <a href="#residential" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Residential</a>
+            <a href="#commercial" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Commercial</a>
+            <a href="#amenities" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Amenities</a>
+            <a href="#mall" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Mall</a>
+            <a href="#news" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">News</a>
+            <a href="#contact" onclick="closeMobileMenu()" class="hover:text-yellow-700 transition-colors">Contact</a>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <header class="h-screen flex flex-col justify-center items-center text-center p-4 relative">
-        <div data-aos="fade-up" data-aos-duration="1500">
+    <header class="dark-accent min-h-screen flex flex-col justify-center items-center text-center px-4 md:px-8 relative">
+        <div data-aos="fade-up" data-aos-duration="1500" class="pt-20">
             <span class="gold-text uppercase tracking-[0.4em] text-xs mb-6 block font-medium">Live. Work. Play.</span>
-            <h1 class="font-serif text-5xl md:text-8xl mb-8 leading-tight drop-shadow-2xl">
-                A City Within <br><span class="italic text-yellow-500/90">The City</span>
+            <h1 class="font-serif text-4xl md:text-8xl mb-6 md:mb-8 leading-tight drop-shadow-2xl text-white">
+                A City Within <br><span class="italic text-yellow-400/90">The City</span>
             </h1>
-            <p class="max-w-2xl mx-auto text-gray-300 font-light text-lg tracking-wide">
-                Botswana’s premier mixed-use development. Located in Gaborone West, adjacent to the A1 highway, minutes from the CBD and Sir Seretse Khama International Airport.
+            <p class="max-w-2xl mx-auto text-gray-200 font-light text-base md:text-lg tracking-wide px-4">
+                Botswana's premier mixed-use development. Gaborone West, adjacent to the A1 highway, minutes from the CBD and Sir Seretse Khama International Airport.
             </p>
         </div>
     </header>
 
     <!-- About Section -->
-    <section id="about" class="max-w-5xl mx-auto px-6 mb-32">
-        <div class="glass-panel p-10 md:p-16 rounded-[2rem]" data-aos="fade-up">
-            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-6 font-semibold">About Sarona City</h2>
-            <p class="font-serif text-2xl md:text-3xl leading-relaxed mb-8">
-                Shaping Botswana’s urban future on 113 hectares of master‑planned, freehold community.
+    <section id="about" class="max-w-5xl mx-auto px-4 md:px-6 mb-20 md:mb-32 mt-16 md:mt-20">
+        <div class="glass-panel p-6 md:p-10 lg:p-16" data-aos="fade-up">
+            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-4 md:mb-6 font-semibold">About Sarona City</h2>
+            <p class="font-serif text-xl md:text-3xl leading-relaxed mb-6 md:mb-8 text-gray-800">
+                Shaping Botswana's urban future on 113 hectares of master‑planned, freehold community.
             </p>
-            <p class="text-gray-400 font-light text-sm md:text-base leading-relaxed mb-6">
+            <p class="text-gray-600 font-light text-sm md:text-base leading-relaxed mb-4 md:mb-6">
                 Conceived and developed by Time Projects, Sarona City is a bold step towards a new urban reality. 
                 This integrated, mixed‑use development blends residential, commercial, retail, educational and recreational 
                 facilities into one cohesive community. Over 50 hectares are dedicated to open green spaces, parks and 
                 landscaped gardens, promoting wellness and environmental harmony.
             </p>
-            <p class="text-gray-400 font-light text-sm md:text-base leading-relaxed mb-6">
-                With freehold ownership, fibre‑ready smart infrastructure and a “15‑minute city” philosophy, 
+            <p class="text-gray-600 font-light text-sm md:text-base leading-relaxed mb-6">
+                With freehold ownership, fibre‑ready smart infrastructure and a "15‑minute city" philosophy, 
                 everything you need is within a short walk or cycle. Here you can truly live, work and play without compromise.
             </p>
-            <div class="inline-block border border-yellow-700/50 rounded-full px-6 py-2 text-xs uppercase tracking-widest text-yellow-500 bg-yellow-900/20">
-                🏆 Time Projects – Property Developer of the Year
+            <div class="inline-block badge rounded-full px-4 md:px-6 py-2 uppercase tracking-widest text-xs">
+                Time Projects — Property Developer of the Year
             </div>
         </div>
     </section>
 
     <!-- Vision Section -->
-    <section id="vision" class="max-w-5xl mx-auto px-6 mb-32">
-        <div class="glass-panel p-10 md:p-16 rounded-[2rem]" data-aos="fade-up">
-            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-6 font-semibold">The Vision</h2>
-            <p class="font-serif text-2xl md:text-3xl leading-relaxed mb-8">
+    <section id="vision" class="max-w-5xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="glass-panel p-6 md:p-10 lg:p-16" data-aos="fade-up">
+            <h2 class="gold-text uppercase tracking-widest text-[10px] mb-4 md:mb-6 font-semibold">The Vision</h2>
+            <p class="font-serif text-xl md:text-3xl leading-relaxed mb-6 md:mb-8 text-gray-800">
                 A smart city designed for a new Botswana.
             </p>
-            <div class="grid md:grid-cols-2 gap-8 text-gray-300 font-light text-sm md:text-base">
+            <div class="grid md:grid-cols-2 gap-6 md:gap-8 text-gray-600 font-light text-sm md:text-base">
                 <div>
-                    <h3 class="gold-text text-lg font-serif mb-2">Connected Living</h3>
+                    <h3 class="gold-text text-base md:text-lg font-serif mb-2">Connected Living</h3>
                     <p>High‑speed fibre to every plot, smart home readiness, and seamless mobility.</p>
                 </div>
                 <div>
-                    <h3 class="gold-text text-lg font-serif mb-2">Economic Hub</h3>
+                    <h3 class="gold-text text-base md:text-lg font-serif mb-2">Economic Hub</h3>
                     <p>Grade A offices, retail boulevards and hospitality within a thriving business ecosystem.</p>
                 </div>
                 <div>
-                    <h3 class="gold-text text-lg font-serif mb-2">Community Well‑Being</h3>
+                    <h3 class="gold-text text-base md:text-lg font-serif mb-2">Community Well‑Being</h3>
                     <p>Schools, clinics, sports complexes and spiritual centres right inside the estate.</p>
                 </div>
                 <div>
-                    <h3 class="gold-text text-lg font-serif mb-2">Green & Blue Networks</h3>
+                    <h3 class="gold-text text-base md:text-lg font-serif mb-2">Green & Blue Networks</h3>
                     <p>Parks, water features, cycle lanes and pedestrian‑friendly streetscapes.</p>
                 </div>
             </div>
@@ -140,65 +264,72 @@ I’ve updated the website using the full content you extracted while keeping th
     </section>
 
     <!-- Residential Section -->
-    <section id="residential" class="max-w-7xl mx-auto px-6 mb-32">
-        <div class="text-center mb-16" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-serif mb-4">Residential</h2>
-            <p class="text-gray-400 font-light tracking-wide">Find your perfect home – from freehold plots to luxury apartments.</p>
+    <section id="residential" class="max-w-7xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="text-center mb-12 md:mb-16" data-aos="fade-up">
+            <h2 class="text-3xl md:text-5xl font-serif mb-4 text-gray-800">Residential</h2>
+            <p class="text-gray-500 font-light tracking-wide text-sm md:text-base">Find your perfect home — from freehold plots to luxury apartments.</p>
         </div>
-        
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-2 gap-6 md:gap-8">
             
             <!-- Freehold Plots -->
-            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
-                <div class="img-container h-72 rounded-3xl mb-6 relative">
-                    <img src="https://images.unsplash.com/photo-1628624747186-a941cd7bbbef?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Freehold Residential Plots">
-                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+            <div class="dark-accent p-4 md:p-6 rounded-[2rem] flex flex-col" data-aos="fade-up">
+                <div class="img-container h-48 md:h-72 mb-4 md:mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1628624747186-a941cd7bbbef?auto=format&fit=crop&w=1000&q=80" 
+                         alt="Freehold Residential Plots"
+                         onerror="this.src='https://images.unsplash.com/photo-1599423300746-b62533397364?auto=format&fit=crop&w=1000&q=80'">
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 badge-dark px-3 md:px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
                 </div>
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Land</p>
-                <h3 class="text-3xl font-serif mb-4">Freehold Residential Plots</h3>
-                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                <h3 class="text-xl md:text-3xl font-serif mb-3 md:mb-4">Freehold Residential Plots</h3>
+                <p class="text-gray-300 text-xs md:text-sm font-light leading-relaxed flex-grow">
                     Sizes from 300 m² to over 1 000 m², fully serviced with water, electricity, sewer and fibre. 
                     Build your dream home with architectural guidelines that ensure aesthetic harmony.
                 </p>
             </div>
 
             <!-- Luxury Apartments -->
-            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="200">
-                <div class="img-container h-72 rounded-3xl mb-6 relative">
-                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Luxury Apartments">
-                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+            <div class="dark-accent p-4 md:p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                <div class="img-container h-48 md:h-72 mb-4 md:mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80" 
+                         alt="Luxury Apartments"
+                         onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80'">
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 badge-dark px-3 md:px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
                 </div>
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Apartments</p>
-                <h3 class="text-3xl font-serif mb-4">Luxury Apartments</h3>
-                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                <h3 class="text-xl md:text-3xl font-serif mb-3 md:mb-4">Luxury Apartments</h3>
+                <p class="text-gray-300 text-xs md:text-sm font-light leading-relaxed flex-grow">
                     1, 2 and 3‑bedroom configurations with modern open‑plan designs, high‑quality finishes, 
                     secure access, dedicated parking and communal gardens.
                 </p>
             </div>
 
             <!-- Townhouses & Duplexes -->
-            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
-                <div class="img-container h-72 rounded-3xl mb-6 relative">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Townhouses & Duplexes">
-                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+            <div class="dark-accent p-4 md:p-6 rounded-[2rem] flex flex-col" data-aos="fade-up">
+                <div class="img-container h-48 md:h-72 mb-4 md:mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80" 
+                         alt="Townhouses"
+                         onerror="this.src='https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=80'">
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 badge-dark px-3 md:px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
                 </div>
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Townhouses</p>
-                <h3 class="text-3xl font-serif mb-4">Townhouses & Duplexes</h3>
-                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                <h3 class="text-xl md:text-3xl font-serif mb-3 md:mb-4">Townhouses & Duplexes</h3>
+                <p class="text-gray-300 text-xs md:text-sm font-light leading-relaxed flex-grow">
                     Contemporary multi‑level homes with private gardens and garages. 
                     Ideal for families seeking space, privacy and a strong sense of community.
                 </p>
             </div>
 
             <!-- Affordable Housing -->
-            <div class="glass-panel p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="200">
-                <div class="img-container h-72 rounded-3xl mb-6 relative">
-                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover" alt="Affordable Housing">
-                    <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
+            <div class="dark-accent p-4 md:p-6 rounded-[2rem] flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                <div class="img-container h-48 md:h-72 mb-4 md:mb-6 relative">
+                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80" 
+                         alt="Affordable Housing"
+                         onerror="this.src='https://images.unsplash.com/photo-1599423300746-b62533397364?auto=format&fit=crop&w=1000&q=80'">
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 badge-dark px-3 md:px-4 py-1 rounded-full text-[10px] uppercase tracking-widest">Available</div>
                 </div>
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2 font-semibold">Affordable</p>
-                <h3 class="text-3xl font-serif mb-4">Affordable Housing</h3>
-                <p class="text-gray-400 text-sm font-light leading-relaxed flex-grow">
+                <h3 class="text-xl md:text-3xl font-serif mb-3 md:mb-4">Affordable Housing</h3>
+                <p class="text-gray-300 text-xs md:text-sm font-light leading-relaxed flex-grow">
                     In partnership with Botswana Housing Corporation, offering quality homes for first‑time buyers 
                     and young professionals. Financing assistance available through major banks.
                 </p>
@@ -207,211 +338,209 @@ I’ve updated the website using the full content you extracted while keeping th
     </section>
 
     <!-- Commercial Section -->
-    <section id="commercial" class="max-w-7xl mx-auto px-6 mb-32">
-        <div class="text-center mb-16" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-serif mb-4">Commercial</h2>
-            <p class="text-gray-400 font-light tracking-wide">The new address for business in Botswana.</p>
+    <section id="commercial" class="max-w-7xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="text-center mb-12 md:mb-16" data-aos="fade-up">
+            <h2 class="text-3xl md:text-5xl font-serif mb-4 text-gray-800">Commercial</h2>
+            <p class="text-gray-500 font-light tracking-wide text-sm md:text-base">The new address for business in Botswana.</p>
         </div>
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="100">
-                <h3 class="text-2xl font-serif mb-4 gold-text">Office Parks</h3>
-                <p class="text-gray-400 text-sm font-light">Grade A office spaces within landscaped business parks. Flexible floor plates from 100 m² to entire buildings, fibre‑ready with backup power and ample parking.</p>
+        <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+            <div class="glass-panel p-6" data-aos="fade-up">
+                <h3 class="text-xl md:text-2xl font-serif mb-3 md:mb-4 gold-text">Office Parks</h3>
+                <p class="text-gray-600 text-sm font-light">Grade A office spaces within landscaped business parks. Flexible floor plates from 100 m², fibre‑ready with backup power.</p>
             </div>
-            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="200">
-                <h3 class="text-2xl font-serif mb-4 gold-text">Retail & Showrooms</h3>
-                <p class="text-gray-400 text-sm font-light">High‑street retail along the main boulevard – from boutique shops to large anchor stores and showrooms. Dedicated loading zones and maximum visibility.</p>
+            <div class="glass-panel p-6" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl md:text-2xl font-serif mb-3 md:mb-4 gold-text">Retail & Showrooms</h3>
+                <p class="text-gray-600 text-sm font-light">High‑street retail along the main boulevard — boutique shops to anchor stores. Dedicated loading zones and maximum visibility.</p>
             </div>
-            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="100">
-                <h3 class="text-2xl font-serif mb-4 gold-text">Hospitality & Leisure</h3>
-                <p class="text-gray-400 text-sm font-light">Designated sites for hotels, restaurants, cafés and entertainment venues, serving both the resident community and daytime business population.</p>
+            <div class="glass-panel p-6" data-aos="fade-up">
+                <h3 class="text-xl md:text-2xl font-serif mb-3 md:mb-4 gold-text">Hospitality & Leisure</h3>
+                <p class="text-gray-600 text-sm font-light">Sites for hotels, restaurants, cafés and entertainment venues serving the resident and business community.</p>
             </div>
-            <div class="glass-panel p-6 rounded-[2rem]" data-aos="fade-up" data-aos-delay="200">
-                <h3 class="text-2xl font-serif mb-4 gold-text">Mixed‑Use Plots</h3>
-                <p class="text-gray-400 text-sm font-light">Investors can purchase freehold commercial plots and develop bespoke projects, subject to design guidelines. Possible BITC incentives for qualifying businesses.</p>
+            <div class="glass-panel p-6" data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl md:text-2xl font-serif mb-3 md:mb-4 gold-text">Mixed‑Use Plots</h3>
+                <p class="text-gray-600 text-sm font-light">Freehold commercial plots for bespoke projects. Possible BITC incentives for qualifying businesses.</p>
             </div>
         </div>
     </section>
 
     <!-- Amenities Section -->
-    <section id="amenities" class="max-w-7xl mx-auto px-6 mb-32">
-        <div class="text-center mb-16" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-serif mb-4">Amenities</h2>
-            <p class="text-gray-400 font-light tracking-wide">Everything you need, right at your doorstep.</p>
+    <section id="amenities" class="max-w-7xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="text-center mb-12 md:mb-16" data-aos="fade-up">
+            <h2 class="text-3xl md:text-5xl font-serif mb-4 text-gray-800">Amenities</h2>
+            <p class="text-gray-500 font-light tracking-wide text-sm md:text-base">Everything you need, right at your doorstep.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="100">
-                <div class="text-4xl mb-3">🎓</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Education</h4>
-                <p class="text-gray-400 text-xs font-light">Sarona City Private School (Pre‑Primary to Secondary, Cambridge curriculum), early learning centre and crèche.</p>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Education</h4>
+                <p class="text-gray-600 text-xs font-light">Sarona City Private School (Pre‑Primary to Secondary, Cambridge curriculum), early learning centre and crèche.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="150">
-                <div class="text-4xl mb-3">🏥</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Health & Wellness</h4>
-                <p class="text-gray-400 text-xs font-light">Planned private medical centre, fully equipped gym, swimming pool, yoga deck and spa.</p>
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up" data-aos-delay="100">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Health & Wellness</h4>
+                <p class="text-gray-600 text-xs font-light">Private medical centre, fully equipped gym, swimming pool, yoga deck and spa.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="200">
-                <div class="text-4xl mb-3">🌳</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Parks & Recreation</h4>
-                <p class="text-gray-400 text-xs font-light">Over 20 themed parks, jogging/cycling trails, playgrounds, splash pads, outdoor gym stations and picnic areas.</p>
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up" data-aos-delay="200">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Parks & Recreation</h4>
+                <p class="text-gray-600 text-xs font-light">Over 20 themed parks, jogging/cycling trails, playgrounds, splash pads and outdoor gym stations.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="100">
-                <div class="text-4xl mb-3">🛍️</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Retail & Dining</h4>
-                <p class="text-gray-400 text-xs font-light">Sarona City Mall (anchor supermarket, cinema, fashion), open‑air cafés and convenience retail in each neighbourhood node.</p>
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Retail & Dining</h4>
+                <p class="text-gray-600 text-xs font-light">Sarona City Mall with anchor supermarket, cinema, fashion stores and open‑air cafés.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="150">
-                <div class="text-4xl mb-3">🔒</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Safety & Security</h4>
-                <p class="text-gray-400 text-xs font-light">24/7 gated and patrolled security, CCTV surveillance, perimeter fencing and controlled access.</p>
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up" data-aos-delay="100">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Safety & Security</h4>
+                <p class="text-gray-600 text-xs font-light">24/7 gated and patrolled security, CCTV surveillance, perimeter fencing and controlled access.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="200">
-                <div class="text-4xl mb-3">📡</div>
-                <h4 class="gold-text text-sm uppercase tracking-widest mb-2">Connectivity</h4>
-                <p class="text-gray-400 text-xs font-light">Fibre‑to‑the‑home/business ready, reliable water and power with solar backup options, and waste recycling programme.</p>
+            <div class="glass-panel p-5 md:p-6 text-center" data-aos="fade-up" data-aos-delay="200">
+                <h4 class="gold-text text-xs md:text-sm uppercase tracking-widest mb-2">Connectivity</h4>
+                <p class="text-gray-600 text-xs font-light">Fibre‑to‑the‑home/business ready, reliable utilities with solar backup and waste recycling.</p>
             </div>
         </div>
     </section>
 
-    <!-- Mall Section with Map -->
-    <section id="mall" class="max-w-7xl mx-auto px-6 mb-32">
-        <div class="glass-panel p-8 md:p-12 rounded-[3rem] grid lg:grid-cols-2 gap-12 items-center" data-aos="zoom-in-up">
+    <!-- Mall Section -->
+    <section id="mall" class="max-w-7xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="dark-accent p-6 md:p-8 lg:p-12 rounded-[2rem] md:rounded-[3rem] grid lg:grid-cols-2 gap-8 md:gap-12 items-center" data-aos="zoom-in-up">
             <div>
-                <h2 class="text-4xl md:text-5xl font-serif mb-4 italic">Porto <span class="gold-text block mt-2 text-3xl not-italic">Sarona City Mall</span></h2>
-                <div class="w-16 h-px bg-yellow-600/50 mb-8"></div>
-                <p class="text-gray-300 font-light leading-relaxed mb-6">
+                <h2 class="text-3xl md:text-5xl font-serif mb-4 italic text-white">Porto <span class="gold-text block mt-2 text-2xl md:text-3xl not-italic">Sarona City Mall</span></h2>
+                <div class="w-16 h-px bg-yellow-600/50 mb-6 md:mb-8"></div>
+                <p class="text-gray-200 font-light leading-relaxed mb-6 text-sm md:text-base">
                     The first shopping centre within the estate, Sarona City Mall will anchor the community with a planned 7 000 m² 
                     of retail space and a curated tenant mix of 39 shops. Developed by Time Projects, it completes the live‑work‑play experience.
                 </p>
-                <ul class="space-y-4 text-sm font-light text-gray-400 mb-8">
+                <ul class="space-y-4 text-sm font-light text-gray-300 mb-6 md:mb-8">
                     <li class="flex items-start">
-                        <span class="gold-text mr-3">✦</span>
-                        <span><strong>Tenant Mix:</strong> Anchor supermarket, cinema, fashion stores, hair & beauty, pharmaceuticals, groceries, stationery, laundromat and a dedicated medical centre.</span>
+                        <span class="gold-text mr-3">—</span>
+                        <span><strong class="text-white/80">Tenant Mix:</strong> Anchor supermarket, cinema, fashion stores, hair & beauty, pharmaceuticals, groceries, stationery, laundromat and a dedicated medical centre.</span>
                     </li>
                     <li class="flex items-start">
-                        <span class="gold-text mr-3">✦</span>
-                        <span><strong>Convenience:</strong> Free parking for all shoppers, high footfall visibility and direct access from the A1 highway.</span>
+                        <span class="gold-text mr-3">—</span>
+                        <span><strong class="text-white/80">Convenience:</strong> Free parking for all shoppers, high footfall visibility and direct access from the A1 highway.</span>
                     </li>
                 </ul>
             </div>
-            
-            <!-- Live Location Map -->
-            <div class="h-[450px] w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
-                <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition duration-500 pointer-events-none"></div>
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3618.356262441999!2d25.932976!3d-24.627685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1eb9159930f3c5f5%3A0x6b72a088bebc8012!2sSarona%20City%20Mall!5e0!3m2!1sen!2sbw!4v1689000000000" class="w-full h-full filter contrast-125" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            <div class="h-64 md:h-[450px] w-full rounded-2xl md:rounded-3xl overflow-hidden border border-white/20 shadow-2xl relative group">
+                <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition duration-500 pointer-events-none"></div>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3618.356262441999!2d25.932976!3d-24.627685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1eb9159930f3c5f5%3A0x6b72a088bebc8012!2sSarona%20City%20Mall!5e0!3m2!1sen!2sbw!4v1689000000000" class="w-full h-full" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </section>
 
     <!-- News Section -->
-    <section id="news" class="max-w-7xl mx-auto px-6 mb-32">
-        <div class="text-center mb-16" data-aos="fade-up">
-            <h2 class="text-4xl md:text-5xl font-serif mb-4">News & Events</h2>
-            <p class="text-gray-400 font-light tracking-wide">Stay up to date with the latest at Sarona City.</p>
+    <section id="news" class="max-w-7xl mx-auto px-4 md:px-6 mb-20 md:mb-32">
+        <div class="text-center mb-12 md:mb-16" data-aos="fade-up">
+            <h2 class="text-3xl md:text-5xl font-serif mb-4 text-gray-800">News & Events</h2>
+            <p class="text-gray-500 font-light tracking-wide text-sm md:text-base">Stay up to date with the latest at Sarona City.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+            <div class="glass-panel p-5 md:p-6" data-aos="fade-up">
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Milestone</p>
-                <h4 class="text-lg font-serif mb-2">Phase 1 Residential Plots Fully Serviced</h4>
-                <p class="text-gray-400 text-xs font-light">Roads, water and electricity complete – plot owners can start building. Drone footage now available.</p>
+                <h4 class="text-base md:text-lg font-serif mb-2 text-gray-800">Phase 1 Residential Plots Fully Serviced</h4>
+                <p class="text-gray-500 text-xs font-light">Roads, water and electricity complete — plot owners can start building.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+            <div class="glass-panel p-5 md:p-6" data-aos="fade-up" data-aos-delay="100">
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Education</p>
-                <h4 class="text-lg font-serif mb-2">Sarona City Private School Opens Enrollment</h4>
-                <p class="text-gray-400 text-xs font-light">The campus is officially open, admissions ongoing for the coming academic year. Virtual tours available.</p>
+                <h4 class="text-base md:text-lg font-serif mb-2 text-gray-800">Sarona City Private School Opens Enrollment</h4>
+                <p class="text-gray-500 text-xs font-light">The campus is officially open, admissions ongoing for the coming academic year.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="300">
+            <div class="glass-panel p-5 md:p-6" data-aos="fade-up" data-aos-delay="200">
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Retail</p>
-                <h4 class="text-lg font-serif mb-2">New Retail Partners Announced for the Mall</h4>
-                <p class="text-gray-400 text-xs font-light">National supermarket chain and pharmacy group sign letters of intent for Sarona City Mall.</p>
+                <h4 class="text-base md:text-lg font-serif mb-2 text-gray-800">New Retail Partners Announced</h4>
+                <p class="text-gray-500 text-xs font-light">National supermarket chain and pharmacy group sign letters of intent for Sarona City Mall.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+            <div class="glass-panel p-5 md:p-6" data-aos="fade-up">
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Award</p>
-                <h4 class="text-lg font-serif mb-2">Time Projects Wins Developer of the Year</h4>
-                <p class="text-gray-400 text-xs font-light">Recognised for innovation and excellence in the master‑planning of Sarona City.</p>
+                <h4 class="text-base md:text-lg font-serif mb-2 text-gray-800">Time Projects Wins Developer of the Year</h4>
+                <p class="text-gray-500 text-xs font-light">Recognised for innovation and excellence in the master‑planning of Sarona City.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+            <div class="glass-panel p-5 md:p-6" data-aos="fade-up" data-aos-delay="100">
                 <p class="gold-text text-[10px] uppercase tracking-widest mb-2">Green Initiative</p>
-                <h4 class="text-lg font-serif mb-2">5,000 Trees Planted Across the Estate</h4>
-                <p class="text-gray-400 text-xs font-light">Community volunteers join the ongoing greening effort, adding shade and beauty to public spaces.</p>
+                <h4 class="text-base md:text-lg font-serif mb-2 text-gray-800">5,000 Trees Planted Across the Estate</h4>
+                <p class="text-gray-500 text-xs font-light">Community volunteers join the ongoing greening effort, adding shade and beauty.</p>
             </div>
-            <div class="glass-panel p-6 rounded-2xl flex items-center justify-center" data-aos="fade-up" data-aos-delay="300">
-                <p class="text-gray-500 text-xs font-light">More news coming soon. Subscribe to our newsletter.</p>
+            <div class="glass-panel p-5 md:p-6 flex items-center justify-center" data-aos="fade-up" data-aos-delay="200">
+                <p class="text-gray-400 text-xs font-light italic text-center">More news coming soon.<br>Subscribe to our newsletter.</p>
             </div>
         </div>
     </section>
 
-    <!-- Footer / Contact Information -->
-    <footer id="contact" class="max-w-7xl mx-auto px-6 pb-12">
-        <div class="glass-panel p-10 md:p-16 rounded-t-[3rem] rounded-b-[1rem]" data-aos="fade-up">
-            <div class="grid md:grid-cols-3 gap-12 border-b border-white/10 pb-12 mb-8">
-                
-                <!-- Contact Info -->
+    <!-- Footer -->
+    <footer id="contact" class="max-w-7xl mx-auto px-4 md:px-6 pb-8 md:pb-12">
+        <div class="dark-accent p-6 md:p-10 lg:p-16 rounded-t-[2rem] md:rounded-t-[3rem] rounded-b-[1rem]" data-aos="fade-up">
+            <div class="grid md:grid-cols-3 gap-8 md:gap-12 border-b border-white/15 pb-8 md:pb-12 mb-6 md:mb-8">
                 <div>
-                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-6">Get in Touch</h4>
-                    <div class="space-y-2 text-sm font-light text-gray-400">
+                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-4 md:mb-6">Get in Touch</h4>
+                    <div class="space-y-2 text-sm font-light text-gray-300">
                         <p><strong class="text-white/80">Sales & Information Centre</strong></p>
                         <p>Plot 145, Gaborone West</p>
                         <p>Gaborone, Botswana</p>
-                        <p class="mt-4">📞 +267 391 2980</p>
-                        <p>✉️ info@saronacity.co.bw</p>
-                        <p class="text-xs text-gray-500 mt-2">Mon–Fri: 08:00–17:00<br>Sat: 09:00–13:00</p>
+                        <p class="mt-4">+267 391 2980</p>
+                        <p>info@saronacity.co.bw</p>
+                        <p class="text-xs text-gray-400 mt-2">Mon–Fri: 08:00–17:00<br>Sat: 09:00–13:00</p>
                     </div>
                 </div>
-
-                <!-- Quick Links -->
                 <div>
-                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-6">Quick Links</h4>
-                    <ul class="space-y-2 text-sm font-light text-gray-400">
-                        <li><a href="#about" class="hover:text-yellow-500 transition-colors">About</a></li>
-                        <li><a href="#vision" class="hover:text-yellow-500 transition-colors">Vision</a></li>
-                        <li><a href="#residential" class="hover:text-yellow-500 transition-colors">Residential</a></li>
-                        <li><a href="#commercial" class="hover:text-yellow-500 transition-colors">Commercial</a></li>
-                        <li><a href="#amenities" class="hover:text-yellow-500 transition-colors">Amenities</a></li>
-                        <li><a href="#mall" class="hover:text-yellow-500 transition-colors">Mall</a></li>
-                        <li><a href="#news" class="hover:text-yellow-500 transition-colors">News</a></li>
+                    <h4 class="gold-text uppercase text-[10px] font-semibold tracking-widest mb-4 md:mb-6">Quick Links</h4>
+                    <ul class="space-y-2 text-sm font-light text-gray-300">
+                        <li><a href="#about" class="hover:text-yellow-400 transition-colors">About</a></li>
+                        <li><a href="#vision" class="hover:text-yellow-400 transition-colors">Vision</a></li>
+                        <li><a href="#residential" class="hover:text-yellow-400 transition-colors">Residential</a></li>
+                        <li><a href="#commercial" class="hover:text-yellow-400 transition-colors">Commercial</a></li>
+                        <li><a href="#amenities" class="hover:text-yellow-400 transition-colors">Amenities</a></li>
+                        <li><a href="#mall" class="hover:text-yellow-400 transition-colors">Mall</a></li>
+                        <li><a href="#news" class="hover:text-yellow-400 transition-colors">News</a></li>
                     </ul>
                 </div>
-
-                <!-- Branding -->
                 <div class="flex flex-col justify-between">
                     <div>
-                        <div class="font-serif text-3xl tracking-widest uppercase mb-4">Sarona <span class="gold-text italic block text-xl mt-1">City</span></div>
-                        <p class="text-xs font-light text-gray-500 leading-relaxed">A Time Projects development. Building Africa’s future through world‑class, sustainable communities.</p>
+                        <div class="font-serif text-2xl md:text-3xl tracking-widest uppercase mb-4 text-white">Sarona <span class="gold-text italic block text-lg md:text-xl mt-1">City</span></div>
+                        <p class="text-xs font-light text-gray-400 leading-relaxed">A Time Projects development. Building Africa's future through world‑class, sustainable communities.</p>
                     </div>
-                    <div class="mt-8 flex space-x-4 text-gray-400 text-xs">
-                        <span>Facebook</span>
-                        <span>Instagram</span>
-                        <span>LinkedIn</span>
-                        <span>YouTube</span>
+                    <div class="mt-6 md:mt-8 flex space-x-4 text-gray-400 text-xs">
+                        <span class="hover:text-yellow-400 cursor-pointer transition-colors">Facebook</span>
+                        <span class="hover:text-yellow-400 cursor-pointer transition-colors">Instagram</span>
+                        <span class="hover:text-yellow-400 cursor-pointer transition-colors">LinkedIn</span>
+                        <span class="hover:text-yellow-400 cursor-pointer transition-colors">YouTube</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="text-center text-[10px] uppercase tracking-widest text-gray-600">
+            <div class="text-center text-[10px] uppercase tracking-widest text-gray-500">
                 &copy; 2026 Time Projects (Pty) Ltd. All Rights Reserved. | Privacy Policy | Terms of Use
             </div>
         </div>
     </footer>
 
-    <!-- Scripts for Animations -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Initialize AOS animations
-        AOS.init({
-            once: true,
-            offset: 50,
-            duration: 800,
-            easing: 'ease-out-quart',
-        });
-        
-        // Add subtle background shift on mouse move for extra 3D feel
-        document.addEventListener('mousemove', (e) => {
-            const body = document.querySelector('body');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            body.style.backgroundPosition = `${x * 10}% ${y * 10}%`;
+        AOS.init({ once: true, offset: 50, duration: 800, easing: 'ease-out-quart' });
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const button = document.querySelector('.mobile-menu');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                button.classList.add('mobile-menu-open');
+                document.body.style.overflow = 'hidden';
+            } else {
+                closeMobileMenu();
+            }
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const button = document.querySelector('.mobile-menu');
+            
+            menu.classList.add('hidden');
+            button.classList.remove('mobile-menu-open');
+            document.body.style.overflow = '';
+        }
+
+        // Close mobile menu on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 769) {
+                closeMobileMenu();
+            }
         });
     </script>
 </body>
 </html>
-```
